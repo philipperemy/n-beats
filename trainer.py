@@ -5,7 +5,7 @@ from torch import optim
 from torch.nn import functional as F
 
 from data import get_data
-from model import GenericNet
+from model import NBeatsNet
 
 
 def test(net, x, target, backcast_length, forecast_length, grad_step):
@@ -35,10 +35,10 @@ def train():
     data_gen = get_data(batch_size, backcast_length, forecast_length,
                         test_starts_at, signal_type='seasonality', random=True)
 
-    net = GenericNet(nb_stacks=2, units=64,
-                     nb_thetas=16, nb_blocks=3,
-                     backcast_length=backcast_length,
-                     forecast_length=forecast_length)
+    net = NBeatsNet(nb_stacks=2, units=64,
+                    nb_thetas=16, nb_blocks=3,
+                    backcast_length=backcast_length,
+                    forecast_length=forecast_length)
 
     optimiser = optim.Adam(net.parameters())
 
