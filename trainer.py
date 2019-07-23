@@ -33,7 +33,7 @@ def train():
     test_starts_at = backcast_length
 
     data_gen = get_data(batch_size, backcast_length, forecast_length,
-                        test_starts_at, signal_type='cos', random=True)
+                        test_starts_at, signal_type='seasonality', random=True)
 
     net = NBeatsNet(nb_stacks=2, units=64,
                     nb_thetas=8, nb_blocks=3,

@@ -2,7 +2,7 @@ import numpy as np
 
 
 def get_data(num_samples, backcast_length, forecast_length,
-             test_starts_at, signal_type='generic', random=False):
+             test_starts_at, signal_type='seasonality', random=False):
     def get_x_y():
         lin_space = np.linspace(-backcast_length, forecast_length, backcast_length + forecast_length)
         if random:
