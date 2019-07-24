@@ -7,7 +7,7 @@
   <i>N-Beats at the beginning of the training</i><br><br>
 </p>
 
-Trust me, after a few more epochs, the green curve (predictions) matches the ground truth exactly :-)
+Trust me, after a few more steps, the green curve (predictions) matches the ground truth exactly :-)
 
 ## Model
 
