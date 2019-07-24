@@ -8,7 +8,7 @@ def get_data(num_samples, backcast_length, forecast_length, signal_type='seasona
             offset = np.random.standard_normal() * 0.1
         else:
             offset = 1
-        if signal_type in ['trend']:
+        if signal_type == 'trend':
             x = lin_space + offset
         elif signal_type == 'seasonality':
             x = np.cos(2 * np.random.randint(low=1, high=3) * np.pi * lin_space)

@@ -15,7 +15,7 @@ def train():
     batch_size = 10
 
     data_gen = get_data(batch_size, backcast_length, forecast_length,
-                        signal_type='seasonality', random=True)
+                        signal_type='trend', random=True)
 
     print('--- Model ---')
     net = NBeatsNet(stack_types=[NBeatsNet.TREND_BLOCK, NBeatsNet.SEASONALITY_BLOCK],
