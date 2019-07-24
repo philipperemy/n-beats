@@ -51,7 +51,7 @@ class Block(nn.Module):
             self.theta_f_fc = nn.Linear(units, thetas_dim)
 
     def forward(self, x):
-        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc1(x.to(DEVICE)))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
         x = F.relu(self.fc4(x))
@@ -167,6 +167,6 @@ class NBeatsNet(nn.Module):
         for stack_id in range(len(self.stacks)):
             for block_id in range(len(self.stacks[stack_id])):
                 b, f = self.stacks[stack_id][block_id](backcast)
-                backcast = backcast - b
-                forecast = forecast + f
+                backcast = backcast.to(DEVICE) - b
+                forecast = forecast.to(DEVICE) + f
         return backcast, forecast

@@ -16,7 +16,7 @@ DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cp
 def train():
     forecast_length = 10
     backcast_length = 5 * forecast_length
-    batch_size = 10
+    batch_size = 10 # greater than 4 for viz
 
     data_gen = get_data(batch_size, backcast_length, forecast_length,
                         signal_type='seasonality', random=True)
@@ -87,7 +87,7 @@ def test(net, x, target, backcast_length, forecast_length, grad_step):
     plt.figure(1)
     plt.subplots_adjust(top=0.88)
     for i in range(4):
-        ff, xx, yy = f.numpy()[i], x[i], target[i]
+        ff, xx, yy = f.cpu().numpy()[i], x[i], target[i]
         plt.subplot(subplots[i])
         plt.plot(range(0, backcast_length), xx, color='b')
         plt.plot(range(backcast_length, backcast_length + forecast_length), yy, color='g')
