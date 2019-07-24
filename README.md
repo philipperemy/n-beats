@@ -4,6 +4,6 @@
 
 
 <p align="center">
-  <img src="nbeats.png" width="600">
+  <img src="nbeats.png" width="600"><br/>
   <i>N-Beats at the beginning of the training</i><br><br>
 </p>
