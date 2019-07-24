@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import torch
 from torch import optim
 from torch.nn import functional as F
-
+from time import time
 from data import get_data
 from model import NBeatsNet
 
@@ -20,7 +20,7 @@ DEVICE = torch.device('cuda') if not args.disable_cuda and torch.cuda.is_availab
 def train():
     forecast_length = 10
     backcast_length = 5 * forecast_length
-    batch_size = 10  # greater than 4 for viz
+    batch_size = 100  # greater than 4 for viz
 
     data_gen = get_data(batch_size, backcast_length, forecast_length,
                         signal_type='seasonality', random=True)
@@ -32,7 +32,7 @@ def train():
                     thetas_dims=[2, 8],
                     nb_blocks_per_stack=3,
                     backcast_length=backcast_length,
-                    hidden_layer_units=128,
+                    hidden_layer_units=1024,
                     share_weights_in_stack=False)
 
     # net = NBeatsNet(stack_types=[NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK],
@@ -44,6 +44,7 @@ def train():
     #                 share_weights_in_stack=False)
 
     optimiser = optim.Adam(net.parameters())
+    start_time = time()
 
     print('--- Training ---')
     initial_grad_step = load(net, optimiser)
@@ -57,7 +58,8 @@ def train():
         optimiser.step()
         if grad_step % 1000 == 0 or (grad_step < 1000 and grad_step % 100 == 0):
             with torch.no_grad():
-                print(f'{str(grad_step).zfill(6)} {loss.item():.6f}')
+                elapsed = int(time() - start_time)
+                print(f'{str(grad_step).zfill(6)} {loss.item():.6f} {elapsed}')
                 save(net, optimiser, grad_step)
                 test(net, x, target, backcast_length, forecast_length, grad_step)
         if grad_step > 10000:
