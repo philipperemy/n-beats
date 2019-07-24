@@ -1,4 +1,5 @@
 import os
+from argparse import ArgumentParser
 
 import matplotlib.pyplot as plt
 import torch
@@ -11,10 +12,25 @@ from model import NBeatsNet
 CHECKPOINT_NAME = 'nbeats-training-checkpoint.th'
 
 
+def get_script_arguments():
+    parser = ArgumentParser(description='NBeats')
+    parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
+    args = parser.parse_args()
+    args.device = None
+    if not args.disable_cuda and torch.cuda.is_available():
+        args.device = torch.device('cuda')
+    else:
+        args.device = torch.device('cpu')
+    return args
+
+
 def train():
     forecast_length = 10
     backcast_length = 5 * forecast_length
     batch_size = 10
+
+    args = get_script_arguments()
+    device = args.device
 
     data_gen = get_data(batch_size, backcast_length, forecast_length,
                         signal_type='seasonality', random=True)
@@ -26,7 +42,7 @@ def train():
                     nb_blocks_per_stack=3,
                     backcast_length=backcast_length,
                     hidden_layer_units=128,
-                    share_weights_in_stack=False)
+                    share_weights_in_stack=False).to(device)
 
     # net = NBeatsNet(stack_types=[NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK],
     #                 forecast_length=forecast_length,
@@ -44,8 +60,8 @@ def train():
         grad_step += initial_grad_step
         optimiser.zero_grad()
         net.train()
-        backcast, forecast = net(torch.tensor(x, dtype=torch.float))
-        loss = F.mse_loss(forecast, torch.tensor(target, dtype=torch.float))
+        backcast, forecast = net(torch.tensor(x, dtype=torch.float).to(device))
+        loss = F.mse_loss(forecast, torch.tensor(target, dtype=torch.float).to(device))
         loss.backward()
         optimiser.step()
         if grad_step % 1000 == 0 or (grad_step < 1000 and grad_step % 100 == 0):
