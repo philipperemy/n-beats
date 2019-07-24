@@ -8,6 +8,8 @@ from torch.nn import functional as F
 from data import get_data
 from model import NBeatsNet
 
+CHECKPOINT_NAME = 'nbeats-training-checkpoint.th'
+
 
 def train():
     forecast_length = 10
@@ -15,7 +17,7 @@ def train():
     batch_size = 10
 
     data_gen = get_data(batch_size, backcast_length, forecast_length,
-                        signal_type='trend', random=True)
+                        signal_type='seasonality', random=True)
 
     print('--- Model ---')
     net = NBeatsNet(stack_types=[NBeatsNet.TREND_BLOCK, NBeatsNet.SEASONALITY_BLOCK],
@@ -61,31 +63,35 @@ def save(model, optimiser, grad_step):
         'grad_step': grad_step,
         'model_state_dict': model.state_dict(),
         'optimizer_state_dict': optimiser.state_dict(),
-    }, 'nbeats-checkpoint.th')
-    torch.save(model.state_dict(), 'model.pth')
-    torch.save(optimiser.state_dict(), 'optimiser.pth')
+    }, CHECKPOINT_NAME)
 
 
 def load(model, optimiser):
-    if os.path.exists('nbeats-checkpoint.th'):
-        checkpoint = torch.load('nbeats-checkpoint.th')
+    if os.path.exists(CHECKPOINT_NAME):
+        checkpoint = torch.load(CHECKPOINT_NAME)
         model.load_state_dict(checkpoint['model_state_dict'])
         optimiser.load_state_dict(checkpoint['optimizer_state_dict'])
         grad_step = checkpoint['grad_step']
-        print('Restored checkpoint from nbeats-checkpoint.th.')
+        print(f'Restored checkpoint from {CHECKPOINT_NAME}.')
         return grad_step
     return 0
 
 
 def test(net, x, target, backcast_length, forecast_length, grad_step):
     net.eval()
-    b, f = net(torch.tensor(x, dtype=torch.float))
-    b, f, x, y = b.numpy()[0], f.numpy()[0], x[0], target[0]
-    plt.plot(range(0, backcast_length), x, color='b')
-    plt.plot(range(backcast_length, backcast_length + forecast_length), y, color='g')
-    plt.plot(range(backcast_length, backcast_length + forecast_length), f, color='r')
-    plt.grid(True)
-    plt.title(grad_step)
+    _, f = net(torch.tensor(x, dtype=torch.float))
+    subplots = [221, 222, 223, 224]
+
+    plt.figure(1)
+    plt.subplots_adjust(top=0.88)
+    for i in range(4):
+        ff, xx, yy = f.numpy()[i], x[i], target[i]
+        plt.subplot(subplots[i])
+        plt.plot(range(0, backcast_length), xx, color='b')
+        plt.plot(range(backcast_length, backcast_length + forecast_length), yy, color='g')
+        plt.plot(range(backcast_length, backcast_length + forecast_length), ff, color='r')
+        plt.title(f'step #{grad_step} ({i})')
+
     plt.show()
 
 
