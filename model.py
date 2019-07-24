@@ -3,6 +3,8 @@ import torch
 from torch import nn
 from torch.nn import functional as F
 
+DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+
 
 def seasonality_model(thetas, t):
     p = thetas.size()[-1]
@@ -11,14 +13,14 @@ def seasonality_model(thetas, t):
     s1 = torch.tensor([np.cos(2 * np.pi * i * t) for i in range(p1)]).float()  # H/2-1
     s2 = torch.tensor([np.sin(2 * np.pi * i * t) for i in range(p2)]).float()
     S = torch.cat([s1, s2])
-    return thetas.mm(S)
+    return thetas.mm(S.to(DEVICE))
 
 
 def trend_model(thetas, t):
     p = thetas.size()[-1]
     assert p <= 4, 'thetas_dim is too big.'
     T = torch.tensor([t ** i for i in range(p)]).float()
-    return thetas.mm(T)
+    return thetas.mm(T.to(DEVICE))
 
 
 def linspace(backcast_length, forecast_length):
