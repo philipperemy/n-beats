@@ -112,9 +112,12 @@ class GenericBlock(nn.Module):
 
 
 class NBeatsNet(nn.Module):
+    SEASONALITY_BLOCK = 0
+    TREND_BLOCK = 1
+    GENERIC_BLOCK = 2
 
     def __init__(self,
-                 nb_stacks=2,
+                 stacks=[TREND_BLOCK, SEASONALITY_BLOCK],
                  nb_blocks_per_stack=3,
                  forecast_length=5,
                  backcast_length=10,
@@ -125,14 +128,24 @@ class NBeatsNet(nn.Module):
         self.backcast_length = backcast_length
         self.stacks = []
         self.parameters = []
-        for stack_id in range(nb_stacks):
+        for stack_id in range(len(stacks)):
             blocks = []
             for block_id in range(nb_blocks_per_stack):
-                block = SeasonalityBlock(hidden_layer_units, thetas_dim, backcast_length, forecast_length)
+                block_init = NBeatsNet.select_block(stacks[stack_id])
+                block = block_init(hidden_layer_units, thetas_dim, backcast_length, forecast_length)
                 blocks.append(block)
                 self.parameters.extend(block.parameters())
             self.stacks.append(blocks)
         self.parameters = nn.ParameterList(self.parameters)
+
+    @staticmethod
+    def select_block(block_type):
+        if block_type == NBeatsNet.SEASONALITY_BLOCK:
+            return SeasonalityBlock
+        elif block_type == NBeatsNet.TREND_BLOCK:
+            return TrendBlock
+        else:
+            return GenericBlock
 
     def forward(self, backcast):
         forecast = torch.zeros(size=(backcast.size()[0], self.forecast_length,))  # maybe batch size here.
