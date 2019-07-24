@@ -151,7 +151,7 @@ class NBeatsNet(nn.Module):
                 block = blocks[-1]  # pick up the last one to make the
             else:
                 block = block_init(self.hidden_layer_units, self.thetas_dim[stack_id],
-                                   self.backcast_length, self.forecast_length)
+                                   self.device, self.backcast_length, self.forecast_length)
                 self.parameters.extend(block.parameters())
             print(f'     | -- {block}')
             blocks.append(block)
