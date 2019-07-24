@@ -1,4 +1,5 @@
 import os
+from argparse import ArgumentParser
 
 import matplotlib.pyplot as plt
 import torch
@@ -10,25 +11,29 @@ from model import NBeatsNet
 
 CHECKPOINT_NAME = 'nbeats-training-checkpoint.th'
 
-DEVICE = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+parser = ArgumentParser(description='N-Beats')
+parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
+args = parser.parse_args()
+DEVICE = torch.device('cuda') if not args.disable_cuda and torch.cuda.is_available() else torch.device('cpu')
 
 
 def train():
     forecast_length = 10
     backcast_length = 5 * forecast_length
-    batch_size = 10 # greater than 4 for viz
+    batch_size = 10  # greater than 4 for viz
 
     data_gen = get_data(batch_size, backcast_length, forecast_length,
                         signal_type='seasonality', random=True)
 
     print('--- Model ---')
-    net = NBeatsNet(stack_types=[NBeatsNet.TREND_BLOCK, NBeatsNet.SEASONALITY_BLOCK],
+    net = NBeatsNet(device=DEVICE,
+                    stack_types=[NBeatsNet.TREND_BLOCK, NBeatsNet.SEASONALITY_BLOCK],
                     forecast_length=forecast_length,
                     thetas_dims=[2, 8],
                     nb_blocks_per_stack=3,
                     backcast_length=backcast_length,
                     hidden_layer_units=128,
-                    share_weights_in_stack=False).to(DEVICE)
+                    share_weights_in_stack=False)
 
     # net = NBeatsNet(stack_types=[NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK],
     #                 forecast_length=forecast_length,
