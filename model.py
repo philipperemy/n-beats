@@ -113,33 +113,43 @@ class NBeatsNet(nn.Module):
     GENERIC_BLOCK = 'generic'
 
     def __init__(self,
-                 stacks=[TREND_BLOCK, SEASONALITY_BLOCK],
+                 stack_types=[TREND_BLOCK, SEASONALITY_BLOCK],
                  nb_blocks_per_stack=3,
                  forecast_length=5,
                  backcast_length=10,
-                 thetas_dim=[4, 8],
+                 thetas_dims=[4, 8],
                  share_weights_in_stack=False,
                  hidden_layer_units=256):
         super(NBeatsNet, self).__init__()
         self.forecast_length = forecast_length
         self.backcast_length = backcast_length
+        self.hidden_layer_units = hidden_layer_units
+        self.nb_blocks_per_stack = nb_blocks_per_stack
+        self.share_weights_in_stack = share_weights_in_stack
+        self.stack_types = stack_types
         self.stacks = []
+        self.thetas_dim = thetas_dims
         self.parameters = []
-        for stack_id in range(len(stacks)):
-            stack_type = stacks[stack_id]
-            print(f'- Stack {stack_type.title()}')
-            blocks = []
-            for block_id in range(nb_blocks_per_stack):
-                block_init = NBeatsNet.select_block(stack_type)
-                if share_weights_in_stack and block_id != 0:
-                    block = blocks[-1]  # pick up the last one to make the
-                else:
-                    block = block_init(hidden_layer_units, thetas_dim[stack_id], backcast_length, forecast_length)
-                    self.parameters.extend(block.parameters())
-                print(f'| -- {block}')
-                blocks.append(block)
-            self.stacks.append(blocks)
+        print(f'| N-Beats')
+        for stack_id in range(len(self.stack_types)):
+            self.stacks.append(self.create_stack(stack_id))
         self.parameters = nn.ParameterList(self.parameters)
+
+    def create_stack(self, stack_id):
+        stack_type = self.stack_types[stack_id]
+        print(f'| --  Stack {stack_type.title()} (#{stack_id}) (share_weights_in_stack={self.share_weights_in_stack})')
+        blocks = []
+        for block_id in range(self.nb_blocks_per_stack):
+            block_init = NBeatsNet.select_block(stack_type)
+            if self.share_weights_in_stack and block_id != 0:
+                block = blocks[-1]  # pick up the last one to make the
+            else:
+                block = block_init(self.hidden_layer_units, self.thetas_dim[stack_id],
+                                   self.backcast_length, self.forecast_length)
+                self.parameters.extend(block.parameters())
+            print(f'     | -- {block}')
+            blocks.append(block)
+        return blocks
 
     @staticmethod
     def select_block(block_type):

@@ -1,8 +1,7 @@
 import numpy as np
 
 
-def get_data(num_samples, backcast_length, forecast_length,
-             test_starts_at, signal_type='seasonality', random=False):
+def get_data(num_samples, backcast_length, forecast_length, signal_type='seasonality', random=False):
     def get_x_y():
         lin_space = np.linspace(-backcast_length, forecast_length, backcast_length + forecast_length)
         if random:
@@ -22,8 +21,8 @@ def get_data(num_samples, backcast_length, forecast_length,
         x -= np.minimum(np.min(x), 0)
         x /= np.max(np.abs(x))
         x = np.expand_dims(x, axis=0)
-        y = x[:, test_starts_at:]
-        x = x[:, :test_starts_at]
+        y = x[:, backcast_length:]
+        x = x[:, :backcast_length]
         return x[0], y[0]
 
     while True:
