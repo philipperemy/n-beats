@@ -22,15 +22,20 @@ def test(net, x, target, backcast_length, forecast_length, grad_step):
 def train():
     forecast_length = 10
     backcast_length = 5 * forecast_length
-    batch_size = 100
+    batch_size = 10
 
     test_starts_at = backcast_length
 
     data_gen = get_data(batch_size, backcast_length, forecast_length,
                         test_starts_at, signal_type='seasonality', random=True)
 
-    net = NBeatsNet(nb_stacks=2, forecast_length=forecast_length, thetas_dim=8, nb_blocks_per_stack=3,
-                    backcast_length=backcast_length, hidden_layer_units=64)
+    net = NBeatsNet(stacks=[NBeatsNet.TREND_BLOCK, NBeatsNet.SEASONALITY_BLOCK],
+                    forecast_length=forecast_length,
+                    thetas_dim=[2, 8],
+                    nb_blocks_per_stack=3,
+                    backcast_length=backcast_length,
+                    hidden_layer_units=128,
+                    share_weights_in_stack=True)
 
     optimiser = optim.Adam(net.parameters())
 

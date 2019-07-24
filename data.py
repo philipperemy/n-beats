@@ -19,6 +19,7 @@ def get_data(num_samples, backcast_length, forecast_length,
             x = np.cos(2 * np.pi * lin_space)
         else:
             raise Exception('Unknown signal type.')
+        x -= np.minimum(np.min(x), 0)
         x /= np.max(np.abs(x))
         x = np.expand_dims(x, axis=0)
         y = x[:, test_starts_at:]

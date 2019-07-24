@@ -16,7 +16,7 @@ def seasonality_model(thetas, t):
 
 def trend_model(thetas, t):
     p = thetas.size()[-1]
-    assert p < 4, 'thetas_dim is too big.'
+    assert p <= 4, 'thetas_dim is too big.'
     T = torch.tensor([t ** i for i in range(p)]).float()
     return thetas.mm(T)
 
@@ -28,79 +28,75 @@ def linspace(backcast_length, forecast_length):
     return b_ls, f_ls
 
 
-class SeasonalityBlock(nn.Module):
+class Block(nn.Module):
 
-    def __init__(self, units, thetas_dim, backcast_length=10, forecast_length=5):
-        super(SeasonalityBlock, self).__init__()
-
-        self.backcast_linspace, self.forecast_linspace = linspace(backcast_length, forecast_length)
+    def __init__(self, units, thetas_dim, backcast_length=10, forecast_length=5, share_thetas=False):
+        super(Block, self).__init__()
+        self.units = units
+        self.thetas_dim = thetas_dim
+        self.backcast_length = backcast_length
+        self.forecast_length = forecast_length
+        self.share_thetas = share_thetas
         self.fc1 = nn.Linear(backcast_length, units)
         self.fc2 = nn.Linear(units, units)
         self.fc3 = nn.Linear(units, units)
         self.fc4 = nn.Linear(units, units)
-
-        self.theta_f_fc = self.theta_b_fc = nn.Linear(units, thetas_dim)
+        self.backcast_linspace, self.forecast_linspace = linspace(backcast_length, forecast_length)
+        if share_thetas:
+            self.theta_f_fc = self.theta_b_fc = nn.Linear(units, thetas_dim)
+        else:
+            self.theta_b_fc = nn.Linear(units, thetas_dim)
+            self.theta_f_fc = nn.Linear(units, thetas_dim)
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))
         x = F.relu(self.fc4(x))
+        return x
 
+    def __str__(self):
+        block_type = type(self).__name__
+        return f'{block_type}(units={self.units}, thetas_dim={self.thetas_dim}, ' \
+            f'backcast_length={self.backcast_length}, forecast_length={self.forecast_length}, ' \
+            f'share_thetas={self.share_thetas}) at @{id(self)}'
+
+
+class SeasonalityBlock(Block):
+
+    def __init__(self, units, thetas_dim, backcast_length=10, forecast_length=5):
+        super(SeasonalityBlock, self).__init__(units, thetas_dim, backcast_length, forecast_length, share_thetas=True)
+
+    def forward(self, x):
+        x = super(SeasonalityBlock, self).forward(x)
         backcast = seasonality_model(self.theta_b_fc(x), self.backcast_linspace)
         forecast = seasonality_model(self.theta_f_fc(x), self.forecast_linspace)
-
         return backcast, forecast
 
 
-class TrendBlock(nn.Module):
+class TrendBlock(Block):
 
     def __init__(self, units, thetas_dim, backcast_length=10, forecast_length=5):
-        super(TrendBlock, self).__init__()
-
-        self.backcast_linspace, self.forecast_linspace = linspace(backcast_length, forecast_length)
-        self.fc1 = nn.Linear(backcast_length, units)
-        self.fc2 = nn.Linear(units, units)
-        self.fc3 = nn.Linear(units, units)
-        self.fc4 = nn.Linear(units, units)
-
-        self.theta_f_fc = self.theta_b_fc = nn.Linear(units, thetas_dim)
+        super(TrendBlock, self).__init__(units, thetas_dim, backcast_length, forecast_length, share_thetas=True)
 
     def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = F.relu(self.fc4(x))
-
+        x = super(TrendBlock, self).forward(x)
         backcast = trend_model(self.theta_b_fc(x), self.backcast_linspace)
         forecast = trend_model(self.theta_f_fc(x), self.forecast_linspace)
-
         return backcast, forecast
 
 
-class GenericBlock(nn.Module):
+class GenericBlock(Block):
 
     def __init__(self, units, thetas_dim, backcast_length=10, forecast_length=5):
-        super(GenericBlock, self).__init__()
-
-        self.fc1 = nn.Linear(backcast_length, units)
-        self.fc2 = nn.Linear(units, units)
-        self.fc3 = nn.Linear(units, units)
-        self.fc4 = nn.Linear(units, units)
-
-        self.theta_b_fc = nn.Linear(units, thetas_dim)
-        self.theta_f_fc = nn.Linear(units, thetas_dim)
+        super(GenericBlock, self).__init__(units, thetas_dim, backcast_length, forecast_length)
 
         self.backcast_fc = nn.Linear(thetas_dim, backcast_length)
         self.forecast_fc = nn.Linear(thetas_dim, forecast_length)
 
     def forward(self, x):
         # no constraint for generic arch.
-
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = F.relu(self.fc4(x))
+        x = super(GenericBlock, self).forward(x)
 
         theta_b = F.relu(self.theta_b_fc(x))
         theta_f = F.relu(self.theta_f_fc(x))
@@ -112,16 +108,17 @@ class GenericBlock(nn.Module):
 
 
 class NBeatsNet(nn.Module):
-    SEASONALITY_BLOCK = 0
-    TREND_BLOCK = 1
-    GENERIC_BLOCK = 2
+    SEASONALITY_BLOCK = 'seasonality'
+    TREND_BLOCK = 'trend'
+    GENERIC_BLOCK = 'generic'
 
     def __init__(self,
                  stacks=[TREND_BLOCK, SEASONALITY_BLOCK],
                  nb_blocks_per_stack=3,
                  forecast_length=5,
                  backcast_length=10,
-                 thetas_dim=10,
+                 thetas_dim=[4, 8],
+                 share_weights_in_stack=False,
                  hidden_layer_units=256):
         super(NBeatsNet, self).__init__()
         self.forecast_length = forecast_length
@@ -129,12 +126,18 @@ class NBeatsNet(nn.Module):
         self.stacks = []
         self.parameters = []
         for stack_id in range(len(stacks)):
+            stack_type = stacks[stack_id]
+            print(f'- Stack {stack_type.title()}')
             blocks = []
             for block_id in range(nb_blocks_per_stack):
-                block_init = NBeatsNet.select_block(stacks[stack_id])
-                block = block_init(hidden_layer_units, thetas_dim, backcast_length, forecast_length)
+                block_init = NBeatsNet.select_block(stack_type)
+                if share_weights_in_stack and block_id != 0:
+                    block = blocks[-1]  # pick up the last one to make the
+                else:
+                    block = block_init(hidden_layer_units, thetas_dim[stack_id], backcast_length, forecast_length)
+                    self.parameters.extend(block.parameters())
+                print(f'| -- {block}')
                 blocks.append(block)
-                self.parameters.extend(block.parameters())
             self.stacks.append(blocks)
         self.parameters = nn.ParameterList(self.parameters)
 
