@@ -1,11 +1,12 @@
 import os
 from argparse import ArgumentParser
+from time import time
 
 import matplotlib.pyplot as plt
 import torch
 from torch import optim
 from torch.nn import functional as F
-from time import time
+
 from data import get_data
 from model import NBeatsNet
 
@@ -13,8 +14,10 @@ CHECKPOINT_NAME = 'nbeats-training-checkpoint.th'
 
 parser = ArgumentParser(description='N-Beats')
 parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
+parser.add_argument('--disable-plot', action='store_true', help='Disable interactive plots')
 args = parser.parse_args()
 DEVICE = torch.device('cuda') if not args.disable_cuda and torch.cuda.is_available() else torch.device('cpu')
+DISABLE_PLOT = args.disable_plot
 
 
 def train():
@@ -61,7 +64,8 @@ def train():
                 elapsed = int(time() - start_time)
                 print(f'{str(grad_step).zfill(6)} {loss.item():.6f} {elapsed}')
                 save(net, optimiser, grad_step)
-                test(net, x, target, backcast_length, forecast_length, grad_step)
+                if not DISABLE_PLOT:
+                    plot(net, x, target, backcast_length, forecast_length, grad_step)
         if grad_step > 10000:
             print('Finished.')
             break
@@ -86,7 +90,7 @@ def load(model, optimiser):
     return 0
 
 
-def test(net, x, target, backcast_length, forecast_length, grad_step):
+def plot(net, x, target, backcast_length, forecast_length, grad_step):
     net.eval()
     _, f = net(torch.tensor(x, dtype=torch.float))
     subplots = [221, 222, 223, 224]
