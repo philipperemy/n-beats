@@ -30,5 +30,3 @@ NBeatsNet(stack_types=[TREND_BLOCK, SEASONALITY_BLOCK], nb_blocks_per_stack=3, f
      | -- SeasonalityBlock(units=128, thetas_dim=8, backcast_length=50, forecast_length=10, share_thetas=True) at @4779953288
 
 ```
-
-Link to the M4 dataset: https://archive.ics.uci.edu/ml/datasets/ElectricityLoadDiagrams20112014
