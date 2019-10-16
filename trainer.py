@@ -1,6 +1,5 @@
 import os
 from argparse import ArgumentParser
-from time import time
 
 import matplotlib.pyplot as plt
 import torch
@@ -8,19 +7,22 @@ from torch import optim
 from torch.nn import functional as F
 
 from data import get_data
-from model import NBeatsNet
+from n_beats.model import NBeatsNet
 
 CHECKPOINT_NAME = 'nbeats-training-checkpoint.th'
 
-parser = ArgumentParser(description='N-Beats')
-parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
-parser.add_argument('--disable-plot', action='store_true', help='Disable interactive plots')
-args = parser.parse_args()
-DEVICE = torch.device('cuda') if not args.disable_cuda and torch.cuda.is_available() else torch.device('cpu')
-DISABLE_PLOT = args.disable_plot
+
+def get_script_arguments():
+    parser = ArgumentParser(description='N-Beats')
+    parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
+    parser.add_argument('--disable-plot', action='store_true', help='Disable interactive plots')
+    args = parser.parse_args()
+    return args
 
 
 def train():
+    args = get_script_arguments()
+    device = torch.device('cuda') if not args.disable_cuda and torch.cuda.is_available() else torch.device('cpu')
     forecast_length = 10
     backcast_length = 5 * forecast_length
     batch_size = 100  # greater than 4 for viz
@@ -29,7 +31,7 @@ def train():
                         signal_type='seasonality', random=True)
 
     print('--- Model ---')
-    net = NBeatsNet(device=DEVICE,
+    net = NBeatsNet(device=device,
                     stack_types=[NBeatsNet.TREND_BLOCK, NBeatsNet.SEASONALITY_BLOCK],
                     forecast_length=forecast_length,
                     thetas_dims=[2, 8],
@@ -38,7 +40,8 @@ def train():
                     hidden_layer_units=1024,
                     share_weights_in_stack=False)
 
-    # net = NBeatsNet(stack_types=[NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK],
+    # net = NBeatsNet(device=device,
+    #                 stack_types=[NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK],
     #                 forecast_length=forecast_length,
     #                 thetas_dims=[7, 8],
     #                 nb_blocks_per_stack=3,
@@ -47,26 +50,33 @@ def train():
     #                 share_weights_in_stack=False)
 
     optimiser = optim.Adam(net.parameters())
-    start_time = time()
 
+    def plot_model(x, target, grad_step):
+        if not args.disable_plot:
+            print('plot()')
+            plot(net, x, target, backcast_length, forecast_length, grad_step)
+
+    simple_fit(net, optimiser, data_gen, plot_model, device)
+
+
+def simple_fit(net, optimiser, data_generator, on_save_callback, device, max_grad_steps=10000):
     print('--- Training ---')
     initial_grad_step = load(net, optimiser)
-    for grad_step, (x, target) in enumerate(data_gen):
+    for grad_step, (x, target) in enumerate(data_generator):
         grad_step += initial_grad_step
         optimiser.zero_grad()
         net.train()
-        backcast, forecast = net(torch.tensor(x, dtype=torch.float).to(DEVICE))
-        loss = F.mse_loss(forecast, torch.tensor(target, dtype=torch.float).to(DEVICE))
+        backcast, forecast = net(torch.tensor(x, dtype=torch.float).to(device))
+        loss = F.mse_loss(forecast, torch.tensor(target, dtype=torch.float).to(device))
         loss.backward()
         optimiser.step()
+        print(f'grad_step = {str(grad_step).zfill(6)}, loss = {loss.item():.6f}')
         if grad_step % 1000 == 0 or (grad_step < 1000 and grad_step % 100 == 0):
             with torch.no_grad():
-                elapsed = int(time() - start_time)
-                print(f'{str(grad_step).zfill(6)} {loss.item():.6f} {elapsed}')
                 save(net, optimiser, grad_step)
-                if not DISABLE_PLOT:
-                    plot(net, x, target, backcast_length, forecast_length, grad_step)
-        if grad_step > 10000:
+                if on_save_callback is not None:
+                    on_save_callback(x, target, grad_step)
+        if grad_step > max_grad_steps:
             print('Finished.')
             break
 
@@ -103,9 +113,12 @@ def plot(net, x, target, backcast_length, forecast_length, grad_step):
         plt.plot(range(0, backcast_length), xx, color='b')
         plt.plot(range(backcast_length, backcast_length + forecast_length), yy, color='g')
         plt.plot(range(backcast_length, backcast_length + forecast_length), ff, color='r')
-        plt.title(f'step #{grad_step} ({i})')
+        # plt.title(f'step #{grad_step} ({i})')
 
-    plt.show()
+    output = 'n_beats_{}.png'.format(grad_step)
+    plt.savefig(output)
+    plt.clf()
+    print('Saved image to {}.'.format(output))
 
 
 if __name__ == '__main__':
