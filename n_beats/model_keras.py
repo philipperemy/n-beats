@@ -43,7 +43,6 @@ class N_Beats:
                         y_ = forecast
                     else :
                         y_ = Add()([y_, forecast])
-                    y_ = Add()([y_, forecast])
                 if self.block_types[j] == 'trend':
                     theta_f = theta_b = Dense(self.nb_poly, activation='linear')(d4)
                     backcast = Lambda(trend_model, arguments={"is_forecast": False, "length": self.backcast_length})(
@@ -55,7 +54,6 @@ class N_Beats:
                         y_ = forecast
                     else :
                         y_ = Add()([y_, forecast])
-                    y_ = Add()([y_, forecast])
                 if self.block_types[j] == 'seasonality':
                     theta_b = theta_f = Dense(self.backcast_length, activation='linear')(d4)
                     # thetas_b = Dense(self.backcast_length, activation='linear')(d4) 
@@ -69,7 +67,6 @@ class N_Beats:
                         y_ = forecast
                     else :
                         y_ = Add()([y_, forecast])
-                    y_ = Add()([y_, forecast])
 
         model = Model(X_, y_)
         model.summary()
