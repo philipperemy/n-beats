@@ -1,5 +1,6 @@
 ### N-BEATS: Neural basis expansion analysis for interpretable time series forecasting
 - *Implementation in Pytorch*
+- *Implementation in Keras by @eljdos*
 - https://arxiv.org/abs/1905.10437
 
 <p align="center">
