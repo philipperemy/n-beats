@@ -3,7 +3,7 @@ import os
 import matplotlib.pyplot as plt
 import numpy as np
 
-from data import get_m4_data
+from data import get_m4_data, dummy_data_generator
 from nbeats_keras.model import NBeatsNet
 
 
@@ -13,17 +13,31 @@ def get_metrics(y_true, y_hat):
     return smape, error
 
 
-def train_model(model: NBeatsNet):
-    if not os.path.exists('results'):
-        os.makedirs('results')
+def ensure_results_dir():
     if not os.path.exists('results/test'):
         os.makedirs('results/test')
 
-    x_test, y_test = get_m4_data(model.backcast_length, model.forecast_length, is_training=False)
+
+def generate_data(backcast_length, forecast_length):
+    x_train, y_train = next(dummy_data_generator(backcast_length, forecast_length,
+                                                 signal_type='seasonality', random=True,
+                                                 batch_size=6_000))
+    x_test, y_test = next(dummy_data_generator(backcast_length, forecast_length,
+                                               signal_type='seasonality', random=True,
+                                               batch_size=1_000))
+    return x_train, y_train, x_test, y_test
+
+
+def train_model(model: NBeatsNet):
+    ensure_results_dir()
+
+    x, y, x_test, y_test = generate_data(model.backcast_length, model.forecast_length)
+
+    # x_test, y_test = get_m4_data(model.backcast_length, model.forecast_length, is_training=False)
     print('x_test.shape=', x_test.shape)
 
     for step in range(model.steps):
-        x, y = get_m4_data(model.backcast_length, model.forecast_length, is_training=True)
+        # x, y = get_m4_data(model.backcast_length, model.forecast_length, is_training=True)
         model.nbeats.train_on_batch(x, y)
         if step % model.plot_results == 0:
             print('step=', step)

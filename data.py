@@ -3,7 +3,7 @@ import csv
 import numpy as np
 
 
-def dummy_data_generator(num_samples, backcast_length, forecast_length, signal_type='seasonality', random=False):
+def dummy_data_generator(backcast_length, forecast_length, signal_type='seasonality', random=False, batch_size=32):
     def get_x_y():
         lin_space = np.linspace(-backcast_length, forecast_length, backcast_length + forecast_length)
         if random:
@@ -38,7 +38,7 @@ def dummy_data_generator(num_samples, backcast_length, forecast_length, signal_t
         while True:
             xx = []
             yy = []
-            for i in range(num_samples):
+            for i in range(batch_size):
                 x, y = get_x_y()
                 xx.append(x)
                 yy.append(y)
