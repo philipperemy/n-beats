@@ -86,12 +86,12 @@ class NBeatsNet:
 
 
 def linear_space(backcast_length, forecast_length, fwd_looking=True):
-    l = K.arange(-float(backcast_length), float(forecast_length), 1) / backcast_length
+    ls = K.arange(-float(backcast_length), float(forecast_length), 1) / backcast_length
     if fwd_looking:
-        l = l[backcast_length:]
+        ls = ls[backcast_length:]
     else:
-        l = l[:backcast_length]
-    return l
+        ls = ls[:backcast_length]
+    return ls
 
 
 def seasonality_model(thetas, backcast_length, forecast_length, is_forecast):
