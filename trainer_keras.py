@@ -1,10 +1,17 @@
 import os
+from argparse import ArgumentParser
 
 import matplotlib.pyplot as plt
 import numpy as np
 
-from data import get_m4_data, dummy_data_generator
+from data import dummy_data_generator, get_m4_data
 from nbeats_keras.model import NBeatsNet
+
+
+def get_script_arguments():
+    parser = ArgumentParser()
+    parser.add_argument('--task', choices=['m4', 'dummy'], required=True)
+    return parser.parse_args()
 
 
 def get_metrics(y_true, y_hat):
@@ -19,44 +26,52 @@ def ensure_results_dir():
 
 
 def generate_data(backcast_length, forecast_length):
-    x_train, y_train = next(dummy_data_generator(backcast_length, forecast_length,
-                                                 signal_type='seasonality', random=True,
-                                                 batch_size=6_000))
-    x_test, y_test = next(dummy_data_generator(backcast_length, forecast_length,
-                                               signal_type='seasonality', random=True,
-                                               batch_size=1_000))
+    def gen(num_samples):
+        return next(dummy_data_generator(backcast_length, forecast_length,
+                                         signal_type='seasonality', random=True,
+                                         batch_size=num_samples))
+
+    x_train, y_train = gen(6_000)
+    x_test, y_test = gen(1_000)
     return x_train, y_train, x_test, y_test
 
 
-def train_model(model: NBeatsNet):
+def train_model(model: NBeatsNet, task: str):
     ensure_results_dir()
 
-    x, y, x_test, y_test = generate_data(model.backcast_length, model.forecast_length)
+    if task == 'dummy':
+        x_train, y_train, x_test, y_test = generate_data(model.backcast_length, model.forecast_length)
+    elif task == 'm4':
+        x_train, y_train = get_m4_data(model.backcast_length, model.forecast_length, is_training=True)
+        x_test, y_test = get_m4_data(model.backcast_length, model.forecast_length, is_training=False)
+    else:
+        raise Exception('Unknown task.')
 
     # x_test, y_test = get_m4_data(model.backcast_length, model.forecast_length, is_training=False)
     print('x_test.shape=', x_test.shape)
 
     for step in range(model.steps):
-        # x, y = get_m4_data(model.backcast_length, model.forecast_length, is_training=True)
-        model.nbeats.train_on_batch(x, y)
+        if task == 'm4':
+            x_train, y_train = get_m4_data(model.backcast_length, model.forecast_length, is_training=True)
+        model.nbeats.train_on_batch(x_train, y_train)
         if step % model.plot_results == 0:
             print('step=', step)
             model.nbeats.save('results/n_beats_model_' + str(step) + '.h5')
-            predictions = model.nbeats.predict(x)
+            predictions = model.nbeats.predict(x_train)
             validation_predictions = model.nbeats.predict(x_test)
             smape = get_metrics(y_test, validation_predictions)[0]
             print('smape=', smape)
             if smape < model.best_perf:
                 model.best_perf = smape
                 model.nbeats.save('results/n_beats_model_ongoing.h5')
-            plot_keras_model_predictions(model, False, step, x[0, :], y[0, :], predictions[0, :])
+            plot_keras_model_predictions(model, False, step, x_train[0, :], y_train[0, :], predictions[0, :])
             plot_keras_model_predictions(model, True, step, x_test[0, :], y_test[0, :], validation_predictions[0])
 
     model.nbeats.save('results/n_beats_model.h5')
 
-    predictions = model.nbeats.predict(x)
+    predictions = model.nbeats.predict(x_train)
     validation_predictions = model.nbeats.predict(x_test)
-    plot_keras_model_predictions(model, False, model.steps, x[100, :], y[100, :], predictions[100, :])
+    plot_keras_model_predictions(model, False, model.steps, x_train[100, :], y_train[100, :], predictions[100, :])
     plot_keras_model_predictions(model, True, model.steps, x_test[10, :], y_test[10, :], validation_predictions[10, :])
 
     print('smape=', get_metrics(y_test, validation_predictions)[0])
@@ -83,11 +98,12 @@ def plot_keras_model_predictions(model, is_test, step, backcast, forecast, predi
     plt.close()
 
 
-def train():
+def main():
+    args = get_script_arguments()
     model = NBeatsNet()
     model.compile_model(loss='mae', learning_rate=1e-5)
-    train_model(model)
+    train_model(model, args.task)
 
 
 if __name__ == '__main__':
-    train()
+    main()

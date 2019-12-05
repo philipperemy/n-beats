@@ -6,7 +6,7 @@ import torch
 from torch import optim
 from torch.nn import functional as F
 
-from data import get_m4_data
+from data import get_m4_data, dummy_data_generator
 from nbeats_pytorch.model import NBeatsNet
 
 CHECKPOINT_NAME = 'nbeats-training-checkpoint.th'
@@ -16,8 +16,8 @@ def get_script_arguments():
     parser = ArgumentParser(description='N-Beats')
     parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
     parser.add_argument('--disable-plot', action='store_true', help='Disable interactive plots')
-    args = parser.parse_args()
-    return args
+    parser.add_argument('--task', choices=['m4', 'dummy'], required=True)
+    return parser.parse_args()
 
 
 def split(arr, size):
@@ -39,18 +39,21 @@ def batcher(dataset, batch_size, infinite=False):
             break
 
 
-def train():
+def main():
     args = get_script_arguments()
     device = torch.device('cuda') if not args.disable_cuda and torch.cuda.is_available() else torch.device('cpu')
     forecast_length = 10
     backcast_length = 5 * forecast_length
     batch_size = 4  # greater than 4 for viz
 
-    # data_gen = dummy_data_generator(backcast_length, forecast_length,
-    #                                 signal_type='seasonality', random=True,
-    #                                 batch_size=batch_size)
-
-    data_gen = batcher(get_m4_data(backcast_length, forecast_length), batch_size=batch_size, infinite=True)
+    if args.task == 'm4':
+        data_gen = batcher(get_m4_data(backcast_length, forecast_length), batch_size=batch_size, infinite=True)
+    elif args.task == 'dummy':
+        data_gen = dummy_data_generator(backcast_length, forecast_length,
+                                        signal_type='seasonality', random=True,
+                                        batch_size=batch_size)
+    else:
+        raise Exception('Unknown task.')
 
     print('--- Model ---')
     net = NBeatsNet(device=device,
@@ -144,4 +147,4 @@ def plot(net, x, target, backcast_length, forecast_length, grad_step):
 
 
 if __name__ == '__main__':
-    train()
+    main()
