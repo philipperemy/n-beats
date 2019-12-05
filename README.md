@@ -1,4 +1,4 @@
-### N-BEATS: Neural basis expansion analysis for interpretable time series forecasting
+# N-BEATS: Neural basis expansion analysis for interpretable time series forecasting
 - *Implementation in Pytorch*
 - *Implementation in Keras by @eljdos*
 - https://arxiv.org/abs/1905.10437
@@ -9,6 +9,20 @@
 </p>
 
 Trust me, after a few more steps, the green curve (predictions) matches the ground truth exactly :-)
+
+## Installation
+
+Installation is based on a MakeFile. Make sure you are in a virtualenv and have python3 installed.
+
+Keras:
+```
+make install-keras
+```
+
+Pytorch:
+```
+make install-pytorch
+```
 
 ## Model
 
