@@ -6,7 +6,7 @@ import torch
 from torch import optim
 from torch.nn import functional as F
 
-from data import dummy_data_generator
+from data import get_m4_data
 from nbeats_pytorch.model import NBeatsNet
 
 CHECKPOINT_NAME = 'nbeats-training-checkpoint.th'
@@ -20,15 +20,37 @@ def get_script_arguments():
     return args
 
 
+def split(arr, size):
+    arrays = []
+    while len(arr) > size:
+        slice_ = arr[:size]
+        arrays.append(slice_)
+        arr = arr[size:]
+    arrays.append(arr)
+    return arrays
+
+
+def batcher(dataset, batch_size, infinite=False):
+    while True:
+        x, y = dataset
+        for x_, y_ in zip(split(x, batch_size), split(y, batch_size)):
+            yield x_, y_
+        if not infinite:
+            break
+
+
 def train():
     args = get_script_arguments()
     device = torch.device('cuda') if not args.disable_cuda and torch.cuda.is_available() else torch.device('cpu')
     forecast_length = 10
     backcast_length = 5 * forecast_length
-    batch_size = 100  # greater than 4 for viz
+    batch_size = 4  # greater than 4 for viz
 
-    data_gen = dummy_data_generator(batch_size, backcast_length, forecast_length,
-                                    signal_type='seasonality', random=True)
+    # data_gen = dummy_data_generator(backcast_length, forecast_length,
+    #                                 signal_type='seasonality', random=True,
+    #                                 batch_size=batch_size)
+
+    data_gen = batcher(get_m4_data(backcast_length, forecast_length), batch_size=batch_size, infinite=True)
 
     print('--- Model ---')
     net = NBeatsNet(device=device,
