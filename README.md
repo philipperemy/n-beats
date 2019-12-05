@@ -14,15 +14,9 @@ Trust me, after a few more steps, the green curve (predictions) matches the grou
 
 Installation is based on a MakeFile. Make sure you are in a virtualenv and have python3 installed.
 
-Command to install N-Beats with Keras:
-```
-make install-keras
-```
+Command to install N-Beats with Keras: `make install-keras`
 
-Command to install N-Beats with Pytorch:
-```
-make install-pytorch
-```
+Command to install N-Beats with Pytorch: `make install-pytorch`
 
 ## Model
 
