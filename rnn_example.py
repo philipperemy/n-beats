@@ -98,13 +98,13 @@ print(np.mean(np.abs(dn.apply_inv(b2_val_uni) - dn.apply_inv(y_val_uni))))
 
 from nbeats_keras.model import NBeatsNet
 
-m = NBeatsNet(stack_types=(NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK),
+m = NBeatsNet(stack_types=(NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK),
               nb_blocks_per_stack=3,
               forecast_length=1,
               backcast_length=univariate_past_history,
-              thetas_dim=(5, 5),
+              thetas_dim=(10, 10, 10),
               share_weights_in_stack=False,
-              hidden_layer_units=128)
+              hidden_layer_units=256)
 m.compile_model(loss='mae', learning_rate=1e-4)
 print('compile_model()')
 print('fit()')

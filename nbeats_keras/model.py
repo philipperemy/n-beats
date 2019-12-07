@@ -29,6 +29,7 @@ class NBeatsNet:
         self.steps = 10001
         self.plot_results = 100
         self.weights = {}
+        assert len(self.stack_types) == len(self.thetas_dim)
 
         X_ = Input(shape=(self.backcast_length,))
         x_ = Lambda(lambda x: x)(X_)
