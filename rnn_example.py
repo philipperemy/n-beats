@@ -2,6 +2,9 @@
 # https://www.kaggle.com/pankrzysiu/6-3-1-a-temperature-forecasting-problem
 # https://www.tensorflow.org/tutorials/structured_data/time_series
 
+# On the hourly temperature dataset and 
+# without much tuning, N-Beats can achieve a 23% reduction in loss compared to the last value benchmark.
+#
 
 import os
 
@@ -14,7 +17,7 @@ pd.set_option('display.max_rows', None)
 pd.set_option('display.max_columns', None)
 pd.set_option('display.width', None)
 
-# https://www.tensorflow.org/tutorials/structured_data/time_series
+
 zip_path = tf.keras.utils.get_file(
     origin='https://storage.googleapis.com/tensorflow/tf-keras-datasets/jena_climate_2009_2016.csv.zip',
     fname='jena_climate_2009_2016.csv.zip',
