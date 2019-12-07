@@ -2,7 +2,7 @@ import os
 
 from setuptools import setup
 
-BASE_VERSION = '1.1.0'  # update regardless whether you update keras or pytorch or both.
+BASE_VERSION = '1.2.0'  # update regardless whether you update keras or pytorch or both.
 FRAMEWORK = os.getenv('FRAMEWORK', 'keras')  # keras, pytorch.
 
 # common packages.
