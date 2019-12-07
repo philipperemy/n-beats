@@ -27,3 +27,7 @@ deploy:
 	make deploy-keras
 	make deploy-pytorch
 
+run-jupyter:
+	pip install jupyter
+	jupyter notebook NBeats.ipynb
+
