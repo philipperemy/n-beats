@@ -9,7 +9,7 @@ install-pytorch:
 	export FRAMEWORK="pytorch" && pip install . --upgrade
 
 clean:
-	rm -rf *egg-info build dist nbeats_pytorch/__pycache__ __pycache__ nbeats_keras/__pycache__ results .DS_Store
+	rm -rf *egg-info build dist nbeats_pytorch/__pycache__ __pycache__ nbeats_keras/__pycache__ results .DS_Store .ipynb_checkpoints
 
 deploy-keras:
 	pip install twine --upgrade
