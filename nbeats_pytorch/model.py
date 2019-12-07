@@ -42,7 +42,7 @@ class NBeatsNet(nn.Module):
         for block_id in range(self.nb_blocks_per_stack):
             block_init = NBeatsNet.select_block(stack_type)
             if self.share_weights_in_stack and block_id != 0:
-                block = blocks[-1]  # pick up the last one to make the
+                block = blocks[-1]  # pick up the last one when we share weights.
             else:
                 block = block_init(self.hidden_layer_units, self.thetas_dim[stack_id],
                                    self.device, self.backcast_length, self.forecast_length)

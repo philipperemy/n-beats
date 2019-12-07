@@ -24,11 +24,12 @@ class NBeatsNet:
         self.stack_types = stack_types
         self.nb_blocks_per_stack = nb_blocks_per_stack
         self.share_weights_in_stack = share_weights_in_stack
-        assert not share_weights_in_stack, 'Feature not implemented.'
+        # assert not share_weights_in_stack, 'Feature not implemented.'
         self.thetas_dim = thetas_dim
         self.best_perf = 100.0
         self.steps = 10001
         self.plot_results = 100
+        self.weights = {}
 
         X_ = Input(shape=(self.backcast_length,))
         x_ = Lambda(lambda x: x)(X_)
@@ -36,7 +37,7 @@ class NBeatsNet:
             stack_type = self.stack_types[stack_id]
             nb_poly = self.thetas_dim[stack_id]
             for block_id in range(self.nb_blocks_per_stack):
-                backcast, forecast = self.create_block(x_, stack_type, nb_poly)
+                backcast, forecast = self.create_block(x_, stack_id, block_id, stack_type, nb_poly)
                 x_ = Subtract()([x_, backcast])
                 if stack_id == 0 and block_id == 0:
                     y_ = forecast
@@ -48,18 +49,43 @@ class NBeatsNet:
 
         self.nbeats = model
 
-    def create_block(self, x, stack_type, nb_poly):
-        d1 = Dense(self.units, activation='relu')(x)
-        d2 = Dense(self.units, activation='relu')(d1)
-        d3 = Dense(self.units, activation='relu')(d2)
-        d4 = Dense(self.units, activation='relu')(d3)
+    def r(self, layer_with_weights, stack_id):
+        # mechanism to restore weights when block share the same weights.
+        # only useful when share_weights_in_stack=True.
+        if self.share_weights_in_stack:
+            layer_name = layer_with_weights.name.split('/')[-1]
+            try:
+                reused_weights = self.weights[stack_id][layer_name]
+                return reused_weights
+            except KeyError:
+                pass
+            if stack_id not in self.weights:
+                self.weights[stack_id] = {}
+            self.weights[stack_id][layer_name] = layer_with_weights
+        return layer_with_weights
+
+    def create_block(self, x, stack_id, block_id, stack_type, nb_poly):
+
+        # register weights (useful when share_weights_in_stack=True)
+        def reg(layer):
+            return self.r(layer, stack_id)
+
+        # update name (useful when share_weights_in_stack=True)
+        def n(layer_name):
+            return '/'.join([str(stack_id), str(block_id), stack_type, layer_name])
+
+        d1 = reg(Dense(self.units, activation='relu', name=n('d1')))(x)
+        d2 = reg(Dense(self.units, activation='relu', name=n('d2')))(d1)
+        d3 = reg(Dense(self.units, activation='relu', name=n('d3')))(d2)
+        d4 = reg(Dense(self.units, activation='relu', name=n('d4')))(d3)
+
         if stack_type == 'generic':
-            theta_b = Dense(nb_poly, activation='linear')(d4)
-            theta_f = Dense(nb_poly, activation='linear')(d4)
-            backcast = Dense(self.backcast_length, activation='linear')(theta_b)
-            forecast = Dense(self.forecast_length, activation='linear')(theta_f)
+            theta_b = reg(Dense(nb_poly, activation='linear', name=n('theta_b')))(d4)
+            theta_f = reg(Dense(nb_poly, activation='linear', name=n('theta_f')))(d4)
+            backcast = reg(Dense(self.backcast_length, activation='linear', name=n('backcast')))(theta_b)
+            forecast = reg(Dense(self.forecast_length, activation='linear', name=n('forecast')))(theta_f)
         elif stack_type == 'trend':
-            theta_f = theta_b = Dense(nb_poly, activation='linear')(d4)
+            theta_f = theta_b = reg(Dense(nb_poly, activation='linear', name=n('theta_f_b')))(d4)
             backcast = Lambda(trend_model,
                               arguments={"is_forecast": False, "backcast_length": self.backcast_length,
                                          "forecast_length": self.forecast_length})(
@@ -69,7 +95,7 @@ class NBeatsNet:
                                          "forecast_length": self.forecast_length})(
                 theta_f)
         else:  # seasonality
-            theta_b = theta_f = Dense(self.backcast_length, activation='linear')(d4)
+            theta_b = theta_f = reg(Dense(self.backcast_length, activation='linear', name=n('theta_f_b')))(d4)
             # theta_b = Dense(self.backcast_length, activation='linear')(d4)
             # theta_b and theta_f are shared even for seasonality bloc
             backcast = Lambda(seasonality_model,
