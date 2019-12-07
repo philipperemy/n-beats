@@ -102,9 +102,9 @@ m = NBeatsNet(stack_types=(NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK, NBe
               nb_blocks_per_stack=3,
               forecast_length=1,
               backcast_length=univariate_past_history,
-              thetas_dim=(10, 10, 10),
+              thetas_dim=(15, 15, 15),
               share_weights_in_stack=False,
-              hidden_layer_units=256)
+              hidden_layer_units=384)
 m.compile_model(loss='mae', learning_rate=1e-4)
 print('compile_model()')
 print('fit()')
@@ -121,5 +121,5 @@ class EvaluateModelCallback(Callback):
 
 
 m.fit(x_train_uni[..., 0], y_train_uni,
-      epochs=10, validation_split=0.1, shuffle=True,
+      epochs=20, validation_split=0.1, shuffle=True,
       callbacks=[EvaluateModelCallback()])
