@@ -26,6 +26,12 @@ Command to install N-Beats with Keras: `make install-keras`
 
 Command to install N-Beats with Pytorch: `make install-pytorch`
 
+## Example
+
+Jupyter notebook: [NBeats.ipynb](NBeats.ipynb): `make run-jupyter`.
+
+
+
 ## Model
 
 Pytorch and Keras have the same model arguments:
