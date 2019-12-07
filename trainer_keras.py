@@ -53,24 +53,24 @@ def train_model(model: NBeatsNet, task: str):
     for step in range(model.steps):
         if task == 'm4':
             x_train, y_train = get_m4_data(model.backcast_length, model.forecast_length, is_training=True)
-        model.nbeats.train_on_batch(x_train, y_train)
+        model.train_on_batch(x_train, y_train)
         if step % model.plot_results == 0:
             print('step=', step)
-            model.nbeats.save('results/n_beats_model_' + str(step) + '.h5')
-            predictions = model.nbeats.predict(x_train)
-            validation_predictions = model.nbeats.predict(x_test)
+            model.save('results/n_beats_model_' + str(step) + '.h5')
+            predictions = model.predict(x_train)
+            validation_predictions = model.predict(x_test)
             smape = get_metrics(y_test, validation_predictions)[0]
             print('smape=', smape)
             if smape < model.best_perf:
                 model.best_perf = smape
-                model.nbeats.save('results/n_beats_model_ongoing.h5')
+                model.save('results/n_beats_model_ongoing.h5')
             plot_keras_model_predictions(model, False, step, x_train[0, :], y_train[0, :], predictions[0, :])
             plot_keras_model_predictions(model, True, step, x_test[0, :], y_test[0, :], validation_predictions[0])
 
-    model.nbeats.save('results/n_beats_model.h5')
+    model.save('results/n_beats_model.h5')
 
-    predictions = model.nbeats.predict(x_train)
-    validation_predictions = model.nbeats.predict(x_test)
+    predictions = model.predict(x_train)
+    validation_predictions = model.predict(x_test)
     plot_keras_model_predictions(model, False, model.steps, x_train[100, :], y_train[100, :], predictions[100, :])
     plot_keras_model_predictions(model, True, model.steps, x_test[10, :], y_test[10, :], validation_predictions[10, :])
 

@@ -48,7 +48,7 @@ class NBeatsNet:
 
         self.nbeats = model
 
-    def r(self, layer_with_weights, stack_id):
+    def _r(self, layer_with_weights, stack_id):
         # mechanism to restore weights when block share the same weights.
         # only useful when share_weights_in_stack=True.
         if self.share_weights_in_stack:
@@ -67,7 +67,7 @@ class NBeatsNet:
 
         # register weights (useful when share_weights_in_stack=True)
         def reg(layer):
-            return self.r(layer, stack_id)
+            return self._r(layer, stack_id)
 
         # update name (useful when share_weights_in_stack=True)
         def n(layer_name):
@@ -108,6 +108,20 @@ class NBeatsNet:
     def compile_model(self, loss, learning_rate):
         optimizer = Adam(lr=learning_rate)
         self.nbeats.compile(loss=loss, optimizer=optimizer)
+
+    def __getattr__(self, name):
+        # https://github.com/faif/python-patterns
+        # model.predict() instead of model.nbeats.predict()
+        # same for fit(), train_on_batch()...
+        attr = getattr(self.nbeats, name)
+
+        if not callable(attr):
+            return attr
+
+        def wrapper(*args, **kwargs):
+            return attr(*args, **kwargs)
+
+        return wrapper
 
 
 def linear_space(backcast_length, forecast_length, fwd_looking=True):
