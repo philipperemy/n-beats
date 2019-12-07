@@ -24,7 +24,6 @@ class NBeatsNet:
         self.stack_types = stack_types
         self.nb_blocks_per_stack = nb_blocks_per_stack
         self.share_weights_in_stack = share_weights_in_stack
-        # assert not share_weights_in_stack, 'Feature not implemented.'
         self.thetas_dim = thetas_dim
         self.best_perf = 100.0
         self.steps = 10001
