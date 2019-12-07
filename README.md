@@ -12,6 +12,14 @@ Trust me, after a few more steps, the green curve (predictions) matches the grou
 
 ## Installation
 
+### From PyPI
+
+Install Keras: `pip install nbeats-keras`.
+
+Install Pytorch: `pip install nbeats-pytorch`.
+
+### From the sources
+
 Installation is based on a MakeFile. Make sure you are in a virtualenv and have python3 installed.
 
 Command to install N-Beats with Keras: `make install-keras`
@@ -20,11 +28,22 @@ Command to install N-Beats with Pytorch: `make install-pytorch`
 
 ## Model
 
-It looks like that:
+Pytorch and Keras have the same model arguments:
 
-`
-NBeatsNet(stack_types=[TREND_BLOCK, SEASONALITY_BLOCK], nb_blocks_per_stack=3, forecast_length=5, backcast_length=10, thetas_dims=[4, 8], share_weights_in_stack=False, hidden_layer_units=256)
-`
+```python
+class NBeatsNet:
+    def __init__(self,
+                 stack_types=[TREND_BLOCK, SEASONALITY_BLOCK],
+                 nb_blocks_per_stack=3,
+                 forecast_length=2,
+                 backcast_length=10,
+                 thetas_dim=[2, 8],
+                 share_weights_in_stack=False,
+                 hidden_layer_units=128):
+    pass                
+```
+
+Which would translate in this model:
 
 ```
 --- Model ---
@@ -37,5 +56,4 @@ NBeatsNet(stack_types=[TREND_BLOCK, SEASONALITY_BLOCK], nb_blocks_per_stack=3, f
      | -- SeasonalityBlock(units=128, thetas_dim=8, backcast_length=50, forecast_length=10, share_thetas=True) at @4779952616
      | -- SeasonalityBlock(units=128, thetas_dim=8, backcast_length=50, forecast_length=10, share_thetas=True) at @4779952952
      | -- SeasonalityBlock(units=128, thetas_dim=8, backcast_length=50, forecast_length=10, share_thetas=True) at @4779953288
-
 ```
