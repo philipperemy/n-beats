@@ -11,11 +11,11 @@ class NBeatsNet:
     GENERIC_BLOCK = 'generic'
 
     def __init__(self,
-                 stack_types=[TREND_BLOCK, SEASONALITY_BLOCK],
+                 stack_types=(TREND_BLOCK, SEASONALITY_BLOCK),
                  nb_blocks_per_stack=3,
                  forecast_length=2,
                  backcast_length=10,
-                 thetas_dim=[4, 8],
+                 thetas_dim=(4, 8),
                  share_weights_in_stack=False,
                  hidden_layer_units=256):
         self.backcast_length = backcast_length

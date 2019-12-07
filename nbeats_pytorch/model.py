@@ -4,6 +4,72 @@ from torch import nn
 from torch.nn import functional as F
 
 
+class NBeatsNet(nn.Module):
+    SEASONALITY_BLOCK = 'seasonality'
+    TREND_BLOCK = 'trend'
+    GENERIC_BLOCK = 'generic'
+
+    def __init__(self,
+                 device,
+                 stack_types=(TREND_BLOCK, SEASONALITY_BLOCK),
+                 nb_blocks_per_stack=3,
+                 forecast_length=5,
+                 backcast_length=10,
+                 thetas_dims=(4, 8),
+                 share_weights_in_stack=False,
+                 hidden_layer_units=256):
+        super(NBeatsNet, self).__init__()
+        self.forecast_length = forecast_length
+        self.backcast_length = backcast_length
+        self.hidden_layer_units = hidden_layer_units
+        self.nb_blocks_per_stack = nb_blocks_per_stack
+        self.share_weights_in_stack = share_weights_in_stack
+        self.stack_types = stack_types
+        self.stacks = []
+        self.thetas_dim = thetas_dims
+        self.parameters = []
+        self.device = device
+        print(f'| N-Beats')
+        for stack_id in range(len(self.stack_types)):
+            self.stacks.append(self.create_stack(stack_id))
+        self.parameters = nn.ParameterList(self.parameters)
+        self.to(self.device)
+
+    def create_stack(self, stack_id):
+        stack_type = self.stack_types[stack_id]
+        print(f'| --  Stack {stack_type.title()} (#{stack_id}) (share_weights_in_stack={self.share_weights_in_stack})')
+        blocks = []
+        for block_id in range(self.nb_blocks_per_stack):
+            block_init = NBeatsNet.select_block(stack_type)
+            if self.share_weights_in_stack and block_id != 0:
+                block = blocks[-1]  # pick up the last one to make the
+            else:
+                block = block_init(self.hidden_layer_units, self.thetas_dim[stack_id],
+                                   self.device, self.backcast_length, self.forecast_length)
+                self.parameters.extend(block.parameters())
+            print(f'     | -- {block}')
+            blocks.append(block)
+        return blocks
+
+    @staticmethod
+    def select_block(block_type):
+        if block_type == NBeatsNet.SEASONALITY_BLOCK:
+            return SeasonalityBlock
+        elif block_type == NBeatsNet.TREND_BLOCK:
+            return TrendBlock
+        else:
+            return GenericBlock
+
+    def forward(self, backcast):
+        forecast = torch.zeros(size=(backcast.size()[0], self.forecast_length,))  # maybe batch size here.
+        for stack_id in range(len(self.stacks)):
+            for block_id in range(len(self.stacks[stack_id])):
+                b, f = self.stacks[stack_id][block_id](backcast)
+                backcast = backcast.to(self.device) - b
+                forecast = forecast.to(self.device) + f
+        return backcast, forecast
+
+
 def seasonality_model(thetas, t, device):
     p = thetas.size()[-1]
     assert p < 10, 'thetas_dim is too big.'
@@ -59,8 +125,8 @@ class Block(nn.Module):
     def __str__(self):
         block_type = type(self).__name__
         return f'{block_type}(units={self.units}, thetas_dim={self.thetas_dim}, ' \
-            f'backcast_length={self.backcast_length}, forecast_length={self.forecast_length}, ' \
-            f'share_thetas={self.share_thetas}) at @{id(self)}'
+               f'backcast_length={self.backcast_length}, forecast_length={self.forecast_length}, ' \
+               f'share_thetas={self.share_thetas}) at @{id(self)}'
 
 
 class SeasonalityBlock(Block):
@@ -107,70 +173,4 @@ class GenericBlock(Block):
         backcast = self.backcast_fc(theta_b)  # generic. 3.3.
         forecast = self.forecast_fc(theta_f)  # generic. 3.3.
 
-        return backcast, forecast
-
-
-class NBeatsNet(nn.Module):
-    SEASONALITY_BLOCK = 'seasonality'
-    TREND_BLOCK = 'trend'
-    GENERIC_BLOCK = 'generic'
-
-    def __init__(self,
-                 device,
-                 stack_types=[TREND_BLOCK, SEASONALITY_BLOCK],
-                 nb_blocks_per_stack=3,
-                 forecast_length=5,
-                 backcast_length=10,
-                 thetas_dims=[4, 8],
-                 share_weights_in_stack=False,
-                 hidden_layer_units=256):
-        super(NBeatsNet, self).__init__()
-        self.forecast_length = forecast_length
-        self.backcast_length = backcast_length
-        self.hidden_layer_units = hidden_layer_units
-        self.nb_blocks_per_stack = nb_blocks_per_stack
-        self.share_weights_in_stack = share_weights_in_stack
-        self.stack_types = stack_types
-        self.stacks = []
-        self.thetas_dim = thetas_dims
-        self.parameters = []
-        self.device = device
-        print(f'| N-Beats')
-        for stack_id in range(len(self.stack_types)):
-            self.stacks.append(self.create_stack(stack_id))
-        self.parameters = nn.ParameterList(self.parameters)
-        self.to(self.device)
-
-    def create_stack(self, stack_id):
-        stack_type = self.stack_types[stack_id]
-        print(f'| --  Stack {stack_type.title()} (#{stack_id}) (share_weights_in_stack={self.share_weights_in_stack})')
-        blocks = []
-        for block_id in range(self.nb_blocks_per_stack):
-            block_init = NBeatsNet.select_block(stack_type)
-            if self.share_weights_in_stack and block_id != 0:
-                block = blocks[-1]  # pick up the last one to make the
-            else:
-                block = block_init(self.hidden_layer_units, self.thetas_dim[stack_id],
-                                   self.device, self.backcast_length, self.forecast_length)
-                self.parameters.extend(block.parameters())
-            print(f'     | -- {block}')
-            blocks.append(block)
-        return blocks
-
-    @staticmethod
-    def select_block(block_type):
-        if block_type == NBeatsNet.SEASONALITY_BLOCK:
-            return SeasonalityBlock
-        elif block_type == NBeatsNet.TREND_BLOCK:
-            return TrendBlock
-        else:
-            return GenericBlock
-
-    def forward(self, backcast):
-        forecast = torch.zeros(size=(backcast.size()[0], self.forecast_length,))  # maybe batch size here.
-        for stack_id in range(len(self.stacks)):
-            for block_id in range(len(self.stacks[stack_id])):
-                b, f = self.stacks[stack_id][block_id](backcast)
-                backcast = backcast.to(self.device) - b
-                forecast = forecast.to(self.device) + f
         return backcast, forecast
