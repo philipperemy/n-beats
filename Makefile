@@ -29,5 +29,5 @@ deploy:
 
 run-jupyter:
 	pip install jupyter
-	jupyter notebook NBeats.ipynb
+	cd examples && jupyter notebook NBeats.ipynb
 
