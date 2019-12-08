@@ -28,7 +28,7 @@ Command to install N-Beats with Pytorch: `make install-pytorch`
 
 ## Example
 
-Jupyter notebook: [NBeats.ipynb](NBeats.ipynb): `make run-jupyter`.
+Jupyter notebook: [NBeats.ipynb](examples/NBeats.ipynb): `make run-jupyter`.
 
 
 
@@ -46,7 +46,7 @@ class NBeatsNet:
                  thetas_dim=[2, 8],
                  share_weights_in_stack=False,
                  hidden_layer_units=128):
-    pass                
+        pass                
 ```
 
 Which would translate in this model:
