@@ -29,5 +29,8 @@ deploy:
 
 run-jupyter:
 	pip install jupyter
-	cd examples && jupyter notebook NBeats.ipynb
+	jupyter notebook examples/NBeats.ipynb
 
+test:
+	cd examples && python trainer_keras.py --task dummy --test
+	cd examples && python trainer_pytorch.py --task dummy --test

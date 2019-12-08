@@ -6,7 +6,7 @@ import torch
 from torch import optim
 from torch.nn import functional as F
 
-from data import get_m4_data, dummy_data_generator
+from examples.data import get_m4_data, dummy_data_generator
 from nbeats_pytorch.model import NBeatsNet
 
 CHECKPOINT_NAME = 'nbeats-training-checkpoint.th'
@@ -17,6 +17,7 @@ def get_script_arguments():
     parser.add_argument('--disable-cuda', action='store_true', help='Disable CUDA')
     parser.add_argument('--disable-plot', action='store_true', help='Disable interactive plots')
     parser.add_argument('--task', choices=['m4', 'dummy'], required=True)
+    parser.add_argument('--test', action='store_true')
     return parser.parse_args()
 
 
@@ -81,7 +82,11 @@ def main():
             print('plot()')
             plot(net, x, target, backcast_length, forecast_length, grad_step)
 
-    simple_fit(net, optimiser, data_gen, plot_model, device)
+    max_grad_steps = 10000
+    if args.test:
+        max_grad_steps = 5
+
+    simple_fit(net, optimiser, data_gen, plot_model, device, max_grad_steps)
 
 
 def simple_fit(net, optimiser, data_generator, on_save_callback, device, max_grad_steps=10000):

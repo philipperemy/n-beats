@@ -4,13 +4,14 @@ from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 import numpy as np
 
-from data import dummy_data_generator, get_m4_data
+from examples.data import dummy_data_generator, get_m4_data
 from nbeats_keras.model import NBeatsNet
 
 
 def get_script_arguments():
     parser = ArgumentParser()
     parser.add_argument('--task', choices=['m4', 'dummy'], required=True)
+    parser.add_argument('--test', action='store_true')
     return parser.parse_args()
 
 
@@ -71,7 +72,7 @@ def train_model(model: NBeatsNet, task: str):
 
     predictions = model.predict(x_train)
     validation_predictions = model.predict(x_test)
-    plot_keras_model_predictions(model, False, model.steps, x_train[100, :], y_train[100, :], predictions[100, :])
+    # plot_keras_model_predictions(model, False, model.steps, x_train[100, :], y_train[100, :], predictions[100, :])
     plot_keras_model_predictions(model, True, model.steps, x_test[10, :], y_test[10, :], validation_predictions[10, :])
 
     print('smape=', get_metrics(y_test, validation_predictions)[0])
@@ -101,6 +102,8 @@ def plot_keras_model_predictions(model, is_test, step, backcast, forecast, predi
 def main():
     args = get_script_arguments()
     model = NBeatsNet()
+    if args.test:
+        model.steps = 5
     model.compile_model(loss='mae', learning_rate=1e-5)
     train_model(model, args.task)
 

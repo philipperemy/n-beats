@@ -5,3 +5,4 @@ venv
 *.th
 .DS_Store
 *.png
+results/
