@@ -6,7 +6,7 @@ import torch
 from torch import optim
 from torch.nn import functional as F
 
-from examples.data import get_m4_data, dummy_data_generator
+from data import get_m4_data, dummy_data_generator
 from nbeats_pytorch.model import NBeatsNet
 
 CHECKPOINT_NAME = 'nbeats-training-checkpoint.th'

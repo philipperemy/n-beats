@@ -30,4 +30,7 @@ jobs:
     - name: Build with Pytorch
       run: |
         make install-pytorch
+    - name: Run tests
+      run: |
+        make test
 

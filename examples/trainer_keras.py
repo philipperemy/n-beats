@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 import numpy as np
 
-from examples.data import dummy_data_generator, get_m4_data
+from data import dummy_data_generator, get_m4_data
 from nbeats_keras.model import NBeatsNet
 
 
