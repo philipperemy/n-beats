@@ -1,0 +1,456 @@
+.LP
+.af PN i
+.ds LH MIT-BIH A\s-2RRHYTHMIA\s+2 D\s-2ATABASE\s+2
+.ds RH F\s-2OREWORD\s+2
+.bp 3
+\s+2
+\fB
+.ce 1
+FOREWORD
+.PP
+For a number of years our group has been investigating methods for real-time
+ECG rhythm analysis.  In the course of this work, we have developed an
+extensive annotated digital ECG database.  The database has been enormously
+helpful to us in algorithm development and evaluation.  The creation of this
+resource required a major effort, and was funded, in part, by both government
+and industry.  We feel it is highly desirable to make this database available
+to other academic and industrial groups, and hence have prepared it for
+distribution.  This catalog contains detailed descriptions of the database
+tapes.
+.PP
+We acknowledge with gratitude the many dedicated hours of work which
+went into this project on the part of cardiologists, Holter technicians,
+laboratory assistants, and engineers in our laboratories at MIT and at
+Beth Israel Hospital.  We also acknowledge the help of our colleagues at
+Washington University, St. Louis (particularly Russell Hermes) in
+assuring a compatible data format.  We especially wish to recognize:
+.IP \(bu
+\fIPaul Schluter\fR, who did the original design and implementation of the
+database.
+.IP \(bu
+\fIScott Peterson\fR, who supervised the detailed data selection, digitization,
+annotation, and editing at Beth Israel Hospital.  He also contributed
+substantially to the development of software needed for using the database in
+our evaluation.
+.IP \(bu
+\fIGeorge Moody\fR, who converted the database to a format compatible with that
+used by the AHA database, and who contributed in a major way to the directory.
+.IP \(bu
+\fILarry Siegal\fR, who contributed to development of the waveform editor
+system.
+.IP \(bu
+\fICheryl Jackson\fR, who was responsible for most of the detailed
+transcription of cardiologist annotations, the comparison and quality control
+functions, and who assembled the final manuscript for the directory.
+.IP \(bu
+\fIDiane Perry\fR, who as chief technician in the Arrhythmia Laboratory helped
+to identify suitable data, and who helped in the annotation process.
+.IP \(bu
+The group of physicians who helped with the difficult task of beat-by-beat
+annotation of the ECGs:
+Dr. Esmerey Acarturk, Dr. John Aumiller, Dr. Sidney Blake, Dr. Alvin
+Blaustein, Dr. Chester Conrad, Dr. Gary Heller, Dr. Michael Malagold,
+Dr. Roger Mark, and Dr. Candice Miklozek.
+
+.nf
+.in +3i
+Roger Mark
+Walter Olson
+
+Cambridge, Massachusetts
+September, 1980
+.in -3i
+.fi
+
+\s+2
+\fB
+.ce 1
+NOTES ON THE SECOND EDITION
+.PP
+During the eight years since we first published this book, nearly one hundred
+academic and industrial research groups worldwide have used the MIT-BIH
+Arrhythmia Database.  We thank these organizations for their support.
+.PP
+In addition to those listed above, we also wish to recognize the
+contributions of:
+.IP \(bu
+\fIJoe Mietus\fR, who handled correspondence as well as production and
+distribution of the database from the Beth Israel Hospital, and who analyzed
+the mechanical sources of analog tape wow and flutter.
+.IP \(bu
+\fITed Baker\fR, who helped in the first ``port'' of the database from our
+homebrew 8080-based systems.
+.PP
+In lieu of reprinting the first edition of this volume, we have made use of
+modern printing technology to produce a far more readable and complete record
+of the contents of the database.  
+.PP
+In June, 1987, the Association for the Advancement of Medical Instrumentation
+published its \fIRecommended Practice for Testing and Reporting
+Performance Results of Ventricular Arrhythmia Detection Algorithms\fR
+(AAMI ECAR-1987), which may be obtained from AAMI, 3330 Washington Boulevard,
+Suite 400, Arlington, VA 22201.
+The MIT-BIH and AHA Databases provide developers and evaluators of arrhythmia
+detectors with standard test data;  the AAMI Recommended Practice provides
+guidelines for using these databases in a standard way, and for describing
+detector performance in a manner that facilitates comparisons between
+detectors.
+We urge all users of our database to follow the AAMI recommendations when
+preparing performance statistics for publication.
+.PP
+A package of C-language software for using the MIT-BIH and AHA Databases
+is available from MIT.  The package
+includes programs for plotting ECGs with annotations, sampling rate
+conversion, and beat-by-beat comparison of annotation files following the
+AAMI recommended practice, as well as a variety of other useful programs.
+All the programs access the database via a common library of subroutines,
+which are also provided as part of the package and which may be used with
+user programs.
+.PP
+We have made several other sets of ECG recordings available, including
+specialized databases for ventricular fibrillation, atrial fibrillation,
+and ST segment changes.  These databases are not annotated beat-by-beat.
+
+.nf
+.in +3i
+George Moody
+Roger Mark
+
+Cambridge, Massachusetts
+August, 1988
+.in -3i
+.fi
+
+\s+2
+\fB
+.ce 1
+NOTES ON THE THIRD EDITION
+.PP
+Since the publication of the second edition, the database has been made
+available in CD-ROM format.  Continued strong interest in the database has made
+it possible to prepare a second edition of the CD-ROM and a third edition of
+this book.  The CD-ROM includes the additional specialized databases mentioned
+above, and the second edition of the CD-ROM also contains the software
+package mentioned above.
+.PP
+Compatible databases of ECGs and other physiologic signals are beginning to
+appear.  Of particular interest to users of our database is the European ST-T
+Database, which consists of ninety two-hour ECG recordings with beats, rhythms,
+and signal quality annotated as in the MIT-BIH Arrhythmia Database, and with
+additional annotations to indicate ST and T-wave morphology changes.  For
+information, write to: CNR Institute of Clinical Physiology, Computer
+Laboratory, via Trieste, 41, 56100 Pisa, Italy.
+.PP
+I wish to thank all of those who have supported this project over these years,
+especially Roger Mark, who has guided it from its inception in 1975.
+
+.nf
+.in +3i
+George Moody
+
+Cambridge, Massachusetts
+July, 1992
+.in -3i
+.fi
+.ds RH I\s-2NTRODUCTION\s+2
+.bp
+.SH
+INTRODUCTION
+.PP
+This introduction describes how the database records were
+obtained, and discusses the characteristics of the recorded signals.
+Following these notes are annotated ``full disclosure'' plots of the entire
+database.  These can be useful for obtaining an overall
+impression of the contents of individual records.  Following the
+``full disclosure'' plots are sample ECG strips.  These strips
+were chosen to illustrate the salient features of each record.
+Next are notes on the important features of each record.
+These notes also include background information on the subjects,
+including their medications.
+At the end of the book are tables of rhythms and annotations, which
+summarize the contents of the database.
+These tables can be helpful in finding a record with a specific
+set of characteristics.
+.SH
+Selection criteria
+.PP
+The source of the ECGs included in the MIT-BIH Arrhythmia Database is a
+set of over 4000 long-term Holter recordings that were obtained
+by the Beth Israel Hospital Arrhythmia Laboratory between 1975 and 1979.
+Approximately 60% of these recordings were obtained from inpatients.
+The database contains 23 records
+(numbered from 100 to 124 inclusive with some numbers missing)
+chosen at random from this set, and 25 records
+(numbered from 200 to 234 inclusive, again with some numbers missing)
+selected from the same set to include a variety of rare but clinically
+important phenomena that would not be well-represented
+by a small random sample of Holter recordings.
+Each of the 48 records is slightly over 30 minutes long.
+.PP
+The first group is intended to serve as a representative sample of the
+variety of waveforms and artifact that an arrhythmia detector might
+encounter in routine clinical use.  A table of random numbers was used
+to select tapes, and then to select half-hour segments of them.
+Segments selected in this way were excluded only if neither of the two
+ECG signals was of adequate quality for analysis by human experts.
+.PP
+Records in the second group were chosen to
+include complex ventricular, junctional,
+and supraventricular arrhythmias and conduction abnormalities.  Several
+of these records were selected because features of the rhythm, QRS
+morphology variation, or signal quality may be expected to present
+significant difficulty to arrhythmia detectors;  these records have
+gained considerable notoriety among database users.
+.PP
+The subjects were 25 men aged 32 to 89 years, and 22 women aged 23 to 89
+years.  (Records 201 and 202 came from the same male subject.)
+.SH
+ECG lead configuration
+.PP
+In most records, the upper signal is a modified limb lead II (MLII),
+obtained by placing the electrodes on the chest.  The lower signal is
+usually a modified lead V1 (occasionally V2 or V5, and in one instance V4);
+as for the upper signal, the electrodes are also placed on the chest.
+This configuration is routinely used by the BIH Arrhythmia Laboratory.
+Normal QRS complexes are usually prominent in the upper signal.
+The lead axis for the lower signal may be nearly orthogonal to the mean
+cardiac electrical axis, however (i.e., normal beats are usually
+biphasic and may be nearly isoelectric).
+Thus normal beats are frequently difficult to discern in the lower signal,
+although ectopic beats will often be more prominent (see, for example, record
+106).
+A notable exception is record 114, for which the signals were reversed.
+Since this happens occasionally in clinical practice, arrhythmia detectors
+should be equipped to deal with this situation.
+In records 102 and 104, it was not possible to use modified lead II because of
+surgical dressings on the patients;
+modified lead V5 was used for the upper signal in these records.
+.SH
+Analog recording and playback
+.PP
+The original analog recordings were made using nine Del Mar Avionics
+model 445 two-channel recorders, designated \fIA\fP through \fII\fP:
+.TS
+center box;
+c | l.
+\fIRecorder	Records\fP
+_
+A	102, 107, 111, 115, 121
+B	212
+C	203
+D	118, 124, 217
+E	101, 103, 106, 108, 112, 117, 119, 122, 209, 219, 220, 223, 233
+F	104, 109, 123, 205, 207, 210, 215, 221
+G	100, 105, 114, 116, 213, 214, 222, 228
+H	113, 201, 202, 231
+I	200, 230, 232, 234
+.TE
+(It is not known which recorder was used for record 208.)
+.PP
+During the digitization process, the analog recordings were played back
+on a Del Mar Avionics model 660 unit.  The analog tapes used for records
+112, 115 through 124, 205, 220, 223, and 230 through 234 were played back
+and digitized at twice real time;  the rest were played back at real time
+using a specially constructed capstan for the model 660 unit.
+Skew between the two signals was found to be as great as 40
+milliseconds for some of the analog recorders.
+In addition to the fixed skew that results from extremely small differences
+in the orientations of the tape heads on the recorder and the playback unit,
+microscopic vertical wobbling of the tape, either during recording or playback,
+introduces a variable skew, which may be comparable in magnitude to the fixed
+skew.
+This problem (which also
+occurs on the AHA database) may present difficulties for certain two-channel
+analysis methods designed for real-time applications.
+.PP
+Minor tape speed variations should not pose problems for typical arrhythmia
+detectors.  It is difficult to avoid tape sticking or slippage during low-speed
+playback, and several episodes of tape slippage were noted and marked with
+comment annotations.  Wow and flutter should be studied carefully in the
+context of heart-rate variability studies, since flutter compensation
+was not possible in these recordings.  A number of frequency-domain artifacts
+have been identified and related to specific mechanical components of the
+recorders and the playback unit:
+.TS
+center box;
+c | l.
+\fIFrequency (Hz)	Source\fR
+_
+0.042	Recorder pressure wheel
+0.083	Playback unit capstan (for twice real-time playback)
+0.090	Recorder capstan
+0.167	Playback unit capstan (for real-time playback)
+0.18\-0.10	Takeup reel (frequency decreases over time)
+0.20\-0.36	Supply reel (frequency increases over time)
+.TE
+The most significant of these artifacts by far is the 0.167 Hz artifact on
+recordings that were played back at real time.  The next largest is the
+0.090 Hz artifact;  the 0.083 Hz artifact on recordings that were played back
+at twice real-time is of roughly the same magnitude as the 0.090 Hz artifact.
+The 0.042 Hz artifact is of much lower magnitude.  Other frequencies
+related to the drive train (at 0.42 Hz, 1.96 Hz, 9.1 Hz, and
+42 Hz) do not appear as noticeable artifacts.
+The frequencies of the last two artifacts listed in the table depend on
+how much tape is on the supply and takeup reels;  the supply reel causes
+a much more noticeable artifact than does the takeup reel.  Other
+frequency-domain artifacts generated by the supply reel appear in the
+0.10\-0.18 Hz and 0.30\-0.54 Hz bands.
+.PP
+Four of the 48 records (102, 104, 107, and 217) include paced beats.
+The original analog recordings do not represent the pacemaker artifacts
+with sufficient fidelity to permit them to be recognized by pulse amplitude
+(or slew rate) and duration alone, the method commonly used for real-time
+processing.  The database records reproduce the analog recordings with
+sufficient fidelity to permit use of pacemaker artifact detectors designed for
+tape analysis, however.
+.SH
+Digitization
+.PP
+The analog outputs of the playback unit
+were filtered to limit analog-to-digital converter (ADC)
+saturation and for anti-aliasing,
+using a passband from 0.1 to 100 Hz relative to real time, well
+beyond the lowest and highest frequencies recoverable from the recordings.
+The bandpass-filtered signals were
+digitized at 360 Hz per signal relative to real time
+using hardware constructed at the MIT Biomedical Engineering Center and
+at the BIH Biomedical Engineering Laboratory.
+The sampling frequency was chosen to facilitate implementations of 60 Hz
+(mains frequency) digital notch filters in arrhythmia detectors.
+Since the recorders were battery-powered, most of the 60 Hz noise present
+in the database arose during playback.
+In those records that were digitized at twice real time, this noise appears
+at 30 Hz (and multiples of 30 Hz) relative to real time.
+.PP
+Samples were acquired from each signal almost simultaneously (the intersignal
+sampling skew was on the order of a few microseconds).  As noted above, analog
+tape skew was several orders of magnitude larger.  The ADCs were
+unipolar, with 11-bit resolution over a \(+-5 mV range.  Sample values thus
+range from 0 to 2047 inclusive, with a value of 1024 corresponding to zero
+volts.
+.PP
+The 11-bit samples were recorded in 8-bit first difference format (this was
+necessary because of limited mass storage capacity).
+Given the sampling frequency and the resolution of the ADC,
+the difference encoding implies a maximum recordable slew rate of \(+-225 mV/s.
+In practice, this limit was exceeded by the input signals very infrequently,
+only during severe noise on a small number of records.
+The effect on the quality of the recorded signals is totally negligible.
+Since the ECG data files are reconstructed from difference data,
+no information is lost and considerable savings in storage may be
+obtained by converting them back into difference form;  a program
+for doing so is included in the package of C-language software available
+from the BIH Biomedical Engineering Laboratory.
+.SH
+Annotations
+.PP
+An initial set of beat labels was produced by a simple slope-sensitive
+QRS detector, which marked each detected event as a normal beat.  Two
+identical 150-foot chart recordings were printed for each 30-minute record,
+with these initial beat labels in the margin.
+For each record, the two charts were given to two cardiologists, who worked
+on them independently.  The cardiologists added additional beat labels
+where the detector missed beats, deleted false detections as necessary,
+and changed the labels for all abnormal beats.  They also added rhythm
+labels, signal quality labels, and comments.
+.PP
+The annotations were transcribed from the paper chart recordings.
+Once both sets of cardiologists' annotations for a given record
+had been transcribed and verified, they were automatically compared
+beat-by-beat, and another chart recording was printed.  This chart showed
+the cardiologists' annotations in the margin, with all discrepancies
+highlighted.  Each discrepancy was reviewed and resolved by consensus.
+The corrections were transcribed, and the annotations were then analyzed
+by an auditing program, which checked them for consistency and which
+located the ten longest and shortest R-R intervals in each record (to
+identify possible missing or falsely detected beats).
+.PP
+In early copies of the database, most beat labels were placed
+at the R-wave peak, but manually inserted labels were not always
+located precisely at the peak.
+In copies of the database made since 1983, the beat labels have been shifted
+from their original locations.  
+The ECG (usually the upper signal) was digitally bandpass-filtered to
+emphasize the QRS complexes, and each beat label was moved to the major local
+extremum, after correction for phase shift in the filter.
+A few noisy beats were manually realigned.
+The result is that annotations generally appear at the R-wave peak, and
+are located with sufficient accuracy to make the reference annotation
+files usable for studies requiring waveform averaging and for
+heart rate variability studies (but note the comments
+with respect to analog tape wow and flutter above).
+In the annotated ECG plots in this book, each label is placed so that the
+fiducial mark for the annotation corresponds to the left edge of the label.
+.PP
+The database contains approximately 109,000 beat labels.  Sixteen
+have been corrected in the eight years since the database was first
+released (in records 104, 108, 114, 203, 207, 217, and 222);  in addition,
+all of the left bundle branch block beats in record 214 were originally
+labelled as normal beats.  The rhythm labels
+have been more substantially revised and now include notations for paced
+rhythm, bigeminy, and trigeminy, which were missing in early copies.
+.ds RH S\s-2YMBOLS\s+2
+.bp
+.ce 1
+\fB\s+2SYMBOLS USED IN ECG PLOTS\s-2\fR
+
+.TS
+center box;
+c | lw(4.5i).
+\fISymbol	Meaning\fR
+_
+\(bu	Normal beat
+L	Left bundle branch block beat
+R	Right bundle branch block beat
+A	Atrial premature beat
+a	Aberrated atrial premature beat
+J	Nodal (junctional) premature beat
+S	Supraventricular premature beat
+V	Premature ventricular contraction
+F	Fusion of ventricular and normal beat
+[	Start of ventricular flutter/fibrillation
+!	Ventricular flutter wave
+]	End of ventricular flutter/fibrillation
+e	Atrial escape beat
+j	Nodal (junctional) escape beat
+E	Ventricular escape beat
+P	Paced beat
+f	Fusion of paced and normal beat
+p	Non-conducted P-wave (blocked APB)
+Q	Unclassifiable beat
+|	Isolated QRS-like artifact
+_
+	T{
+Rhythm annotations appear \fIbelow\fP the level used for beat
+annotations:
+T}
+(AB	Atrial bigeminy
+(AFIB	Atrial fibrillation
+(AFL	Atrial flutter
+(B	Ventricular bigeminy
+(BII	2\(de heart block
+(IVR	Idioventricular rhythm
+(N	Normal sinus rhythm
+(NOD	Nodal (A-V junctional) rhythm
+(P	Paced rhythm
+(PREX	Pre-excitation (WPW)
+(SBR	Sinus bradycardia
+(SVTA	Supraventricular tachyarrhythmia
+(T	Ventricular trigeminy
+(VFL	Ventricular flutter
+(VT	Ventricular tachycardia
+_
+	T{
+Signal quality and comment annotations appear \fIabove\fR the level
+used for beat annotations:
+T}
+\fIqq\fR	T{
+Signal quality change:  the first character (`c' or `n') indicates the quality
+of the upper signal (clean or noisy), and the second character indicates the
+quality of the lower signal
+T}
+U 	Extreme noise or signal loss in both signals:  ECG is unreadable
+M	Missed beat (`MISSB' in examples, pp. 99\-177)
+P	Pause (`PSE' in examples)
+T	Tape slippage (`TS' in examples)
+.TE

@@ -1,0 +1,4 @@
+-r 108
+-a atr
+-f 10:55
+-p http://<!--#echo var="SERVER_NAME" -->/physiobank/database/mitdb/

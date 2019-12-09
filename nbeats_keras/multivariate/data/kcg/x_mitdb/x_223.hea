@@ -1,0 +1,8 @@
+x_223 2 360 216000
+x_223.dat 212 200(0) 11 1024 838 -14319 0 MLII
+x_223.dat 212 200(0) 11 1024 992 23357 0 V1
+# 73 M 3070 654 x2
+# None
+# The PVCs are multiform.  The two longest episodes of ventricular tachycardia
+# are slow (100 to 105 bpm) and bidirectional.
+#Produced by xform from record 223, beginning at 0:0

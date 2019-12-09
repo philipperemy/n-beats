@@ -1,0 +1,9 @@
+203 2 360 650000
+203.dat 212 200 11 1024 972 5391 0 MLII
+203.dat 212 200 11 1024 1037 28451 0 V1
+# 43 M 1878 356 x1
+# Coumadin, Digoxin, Heparin, Hygroton, Lasix
+# The PVCs are multiform.  There are QRS morphology changes in the upper
+# channel due to axis shifts.  There is considerable noise in both channels,
+# including muscle artifact and baseline shifts.  This is a very difficult
+# record, even for humans!

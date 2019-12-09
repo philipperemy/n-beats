@@ -1,0 +1,154 @@
+<HTML>
+<HEAD>
+<TITLE>MIT-BIH Arrhythmia Database Directory</TITLE>
+</HEAD>
+<BODY bgcolor="#AOD0FF">
+<BR> <P>
+<H1 ALIGN=CENTER>MIT-BIH Arrhythmia Database Directory</H1>
+<P ALIGN=CENTER><STRONG>Hypertext edition, 24 May 1997<BR>
+(Based on the printed third edition, 23 July 1992)<BR>
+<BR> 
+<BR> 
+<BR> 
+Harvard-MIT Division of Health Sciences and Technology<BR> 
+Biomedical Engineering Center</STRONG></P><P>
+<P>
+Copyright &#169; 1980, 1988, 1992, 1997 Massachusetts Institute of Technology.
+<P>
+The database described in this directory can be downloaded without charge
+from
+<A HREF="http://physionet.org/physiobank/database/mitdb/">http://physionet.org/physiobank/database/mitdb/</A>
+(located at MIT, in Cambridge, MA, USA) and from
+PhysioNet <a href="/mirrors/">mirrors</a> worldwide.
+
+<P>
+You may print your own copy of this directory, with illustrations.  See
+the <a href="src/makefile">makefile for UNIX</a> or the
+<a href="src/printdir.bat">batch file for MS-DOS</a> for further information.
+<P>
+Permission is granted to make and distribute verbatim copies of this
+guide provided that the copyright notice and this permission notice are
+preserved on all copies.
+<P>
+Permission is granted to copy and distribute modified versions of this
+guide under the conditions for verbatim copying, provided also that the
+entire resulting derived work is distributed under the terms of a
+permission notice identical to this one.
+<P>
+Permission is granted to copy and distribute translations of this guide
+into another language, under the above conditions for modified versions.
+<P>
+<BR> <HR>
+<a name="toc"><H2>Table of Contents</H2></a>
+
+<ul>
+<li> <a href="foreword.htm">Foreword</a>
+<li> <a href="intro.htm">Introduction</a>
+     <ul>
+     <li> <a href="intro.htm#selection">Selection criteria</a>
+     <li> <a href="intro.htm#leads">ECG lead configuration</a>
+     <li> <a href="intro.htm#analog">Analog recording and playback</a>
+     <li> <a href="intro.htm#digitization">Digitization</a>
+     <li> <a href="intro.htm#annotations">Annotations</a>
+     <li> <a href="intro.htm#symbols">Symbols used in plots</a>
+     </ul>
+<li> <a href="records.htm">Records</a>
+<table>
+<tr>
+<td><a href="records.htm#100">100</a>
+<td><a href="records.htm#104">104</a>
+<td><a href="records.htm#108">108</a>
+<td><a href="records.htm#113">113</a>
+<td><a href="records.htm#117">117</a>
+<td><a href="records.htm#122">122</a>
+<td><a href="records.htm#201">201</a>
+<td><a href="records.htm#207">207</a>
+<td><a href="records.htm#212">212</a>
+<td><a href="records.htm#217">217</a>
+<td><a href="records.htm#222">222</a>
+<td><a href="records.htm#231">231</a></tr>
+<tr>
+<td><a href="records.htm#101">101</a>
+<td><a href="records.htm#105">105</a>
+<td><a href="records.htm#109">109</a>
+<td><a href="records.htm#114">114</a>
+<td><a href="records.htm#118">118</a>
+<td><a href="records.htm#123">123</a>
+<td><a href="records.htm#202">202</a>
+<td><a href="records.htm#208">208</a>
+<td><a href="records.htm#213">213</a>
+<td><a href="records.htm#219">219</a>
+<td><a href="records.htm#223">223</a>
+<td><a href="records.htm#232">232</a></tr>
+<tr>
+<td><a href="records.htm#102">102</a>
+<td><a href="records.htm#106">106</a>
+<td><a href="records.htm#111">111</a>
+<td><a href="records.htm#115">115</a>
+<td><a href="records.htm#119">119</a>
+<td><a href="records.htm#124">124</a>
+<td><a href="records.htm#203">203</a>
+<td><a href="records.htm#209">209</a>
+<td><a href="records.htm#214">214</a>
+<td><a href="records.htm#220">220</a>
+<td><a href="records.htm#228">228</a>
+<td><a href="records.htm#233">233</a></tr>
+<tr>
+<td><a href="records.htm#103">103</a>
+<td><a href="records.htm#107">107</a>
+<td><a href="records.htm#112">112</a>
+<td><a href="records.htm#116">116</a>
+<td><a href="records.htm#121">121</a>
+<td><a href="records.htm#200">200</a>
+<td><a href="records.htm#205">205</a>
+<td><a href="records.htm#210">210</a>
+<td><a href="records.htm#215">215</a>
+<td><a href="records.htm#221">221</a>
+<td><a href="records.htm#230">230</a>
+<td><a href="records.htm#234">234</a></tr>
+</table>
+
+<li> <a href="tables.htm">Tables</a>
+<ul>
+<li> <a href="tables.htm#allbeats">Table of beat types (entire records)</a>
+<li> <a href="tables.htm#allrhythms">Table of rhythms (entire records)</a>
+<li> <a href="tables.htm#testbeats">Table of beat types (test periods only)</a>
+<li> <a href="tables.htm#testrhythms">Table of rhythms (test periods only)</a>
+</ul>
+</ul>
+
+<BR><HR>
+<H2>Other links of interest</H2>
+<UL>
+<LI><A HREF="http://ecg.mit.edu">The MIT-BIH Database Distribution
+Home Page</A><BR>
+Information about CD-ROM databases of ECGs and other physiologic signals,
+and related software.
+<LI><I><A HREF="/physiotools/wpg/">WFDB Programmer's Guide</A></I>
+<BR>
+Includes tutorial and reference material relating to the WFDB library,
+a portable set of functions (subroutines) for reading and writing files in the
+formats supported by the applications described here.  The WFDB library may be
+used with C, C++, or Fortran programs;  the guide primarily describes the C
+interface.
+<LI><I><A HREF="/physiotools/wag/">WFDB Applications Guide</A></I>
+<BR>
+Includes <TT>man</TT> pages for the applications included in the WFDB Software
+Package, specifications for file formats supported by the DB library.  Detailed
+installation instructions for the WFDB Software Package are included in an
+appendix, and a second appendix discusses how the performance of ECG analyzers
+can be formally evaluated using standard reference databases and the standard
+evaluation tools included in the WFDB Software Package.
+<LI><I><A HREF="/physiotools/wug/">WAVE User's Guide</A></I><BR>
+A comprehensive tutorial, with extensive reference material, for
+<STRONG>WAVE</STRONG>, an interactive waveform browser with facilities for
+annotation editing and control of external analysis programs.
+<STRONG>WAVE</STRONG> runs on PCs under the free Linux operating system, and
+on SPARC-based systems under SunOS or Solaris.
+</UL>
+<BR> <HR>
+<P><ADDRESS>
+<I><A HREF="mailto:george@mit.edu">George B. Moody (<tt>george@mit.edu</tt>)</A></ADDRESS></I><BR>
+24 May 1997 (Links updated 31 October 2001 for PhysioNet)
+</BODY>
+</HTML>

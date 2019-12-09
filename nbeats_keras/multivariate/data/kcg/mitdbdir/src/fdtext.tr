@@ -1,0 +1,46 @@
+.LP
+.ds LH MIT-BIH A\s-2RRHYTHMIA\s+2 D\s-2ATABASE\s+2
+.ds CH - 1 -
+.ds RH F\s-2ULL\-DISCLOSURE \s+2ECG P\s-2LOTS\s+2
+.bp 2
+.DS
+
+
+
+
+
+
+
+
+
+
+
+
+.DE
+.ce 1
+\fB\s+2FULL\-DISCLOSURE ECG PLOTS\s-2\fR
+
+
+.PP
+This section contains annotated ``full-disclosure'' ECG plots for the
+entire database.  Each record is presented on two facing pages.  Each
+page contains fifteen one-minute segments.  Each segment contains a pair
+of ECG traces with annotation labels placed between them.  Each label is
+placed so that the fiducial mark for the annotation corresponds to the
+left edge of the label.  The meanings of the various labels are given
+in the table on page viii.
+.PP
+The scale is 2.5 mm/sec and 1 mm/mV (i.e., one-tenth the standard scale
+for ECG chart recordings).  To improve the legibility of these plots, the
+ECG signals were digitally low-pass filtered with a nine-point moving average
+filter before plotting them;  for this reason, high-frequency noise appears
+smaller in amplitude in these plots than in the unfiltered high-resolution
+strips which begin on page 98.
+.PP
+At the top and bottom of
+each page is a time scale with one-second intervals marked;  five-second
+intervals are designated with large ticks on these scales.  To the left
+and right of each segment are the times of the beginning and end
+of the segment (in minutes and seconds from
+the beginning of the record).  The last segment for each record begins at
+29 minutes, and ends at 30 minutes and 5.556 seconds (the end of the record).
