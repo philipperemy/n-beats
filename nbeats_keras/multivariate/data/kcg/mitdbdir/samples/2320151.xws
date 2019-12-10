@@ -1,4 +1,0 @@
--r 232
--a atr
--f 1:51
--p http://<!--#echo var="SERVER_NAME" -->/physiobank/database/mitdb/

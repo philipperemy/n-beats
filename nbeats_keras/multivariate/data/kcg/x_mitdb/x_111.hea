@@ -1,8 +1,0 @@
-x_111 2 360 216000
-x_111.dat 212 200(0) 11 1024 1017 9628 0 MLII
-x_111.dat 212 200(0) 11 1024 1031 -26474 0 V1
-# 47 F 937 167 x1
-# Digoxin, Lasix
-# There is first degree AV block.  There are short bursts of both baseline
-# shifts and muscle noise, but in general, the quality is excellent.
-#Produced by xform from record 111, beginning at 0:0

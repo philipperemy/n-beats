@@ -144,6 +144,7 @@ def main():
     train_model(model, 'm4')
     
     #kcg
+    # please uncompress the data/kcg folder before running the script 
     model = NBeatsNet(input_dim=2, exo_dim=0, backcast_length=360, forecast_length=10, 
                     stack_types=[TREND_BLOCK, SEASONALITY_BLOCK], nb_blocks_per_stack=3, 
                     thetas_dim = [4, 8], share_weights_in_stack=False,

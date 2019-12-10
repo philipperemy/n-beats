@@ -1,7 +1,0 @@
-x_122 2 360 216000
-x_122.dat 212 200(0) 11 1024 868 -21549 0 MLII
-x_122.dat 212 200(0) 11 1024 877 -19951 0 V1
-# 51 M 640 654 x2
-# Digoxin, Lasix, Pronestyl
-# The lower channel has low-amplitude high-frequency noise throughout.
-#Produced by xform from record 122, beginning at 0:0
