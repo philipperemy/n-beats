@@ -34,7 +34,7 @@ def dummy_data_generator(backcast_length, forecast_length, signal_type='seasonal
         x /= max_x
         y /= max_x
 
-        return x, None, y
+        return x, y
 
     def gen():
         while True:
@@ -51,8 +51,99 @@ def dummy_data_generator(backcast_length, forecast_length, signal_type='seasonal
 
 def get_m4_data(backcast_length, forecast_length, is_training=True):
     # https://www.mcompetitions.unic.ac.cy/the-dataset/
+
+    if is_training:
+        filename = 'data/m4/train/Daily-train.csv'
+    else:
+        filename = 'data/m4/val/Daily-test.csv'
+
+    x = np.array([]).reshape(0, backcast_length)
+    y = np.array([]).reshape(0, forecast_length)
+    x_tl = []
+    headers = True
+    with open(filename, "r") as file:
+        reader = csv.reader(file, delimiter=',')
+        for line in reader:
+            line = line[1:]
+            if not headers:
+                x_tl.append(line)
+            if headers:
+                headers = False
+    x_tl_tl = np.array(x_tl)
+    for i in range(x_tl_tl.shape[0]):
+        if len(x_tl_tl[i]) < backcast_length + forecast_length:
+            continue
+        time_series = np.array(x_tl_tl[i])
+        time_series = [float(s) for s in time_series if s != '']
+        time_series_cleaned = np.array(time_series)
+        if is_training:
+            time_series_cleaned_forlearning_x = np.zeros((1, backcast_length))
+            time_series_cleaned_forlearning_y = np.zeros((1, forecast_length))
+            j = np.random.randint(backcast_length, time_series_cleaned.shape[0] + 1 - forecast_length)
+            time_series_cleaned_forlearning_x[0, :] = time_series_cleaned[j - backcast_length: j]
+            time_series_cleaned_forlearning_y[0, :] = time_series_cleaned[j:j + forecast_length]
+        else:
+            time_series_cleaned_forlearning_x = np.zeros(
+                (time_series_cleaned.shape[0] + 1 - (backcast_length + forecast_length), backcast_length))
+            time_series_cleaned_forlearning_y = np.zeros(
+                (time_series_cleaned.shape[0] + 1 - (backcast_length + forecast_length), forecast_length))
+            for j in range(backcast_length, time_series_cleaned.shape[0] + 1 - forecast_length):
+                time_series_cleaned_forlearning_x[j - backcast_length, :] = time_series_cleaned[j - backcast_length:j]
+                time_series_cleaned_forlearning_y[j - backcast_length, :] = time_series_cleaned[j: j + forecast_length]
+        x = np.vstack((x, time_series_cleaned_forlearning_x))
+        y = np.vstack((y, time_series_cleaned_forlearning_y))
+
+    return x, y
+
+
+def dummy_data_generator_multivariate(backcast_length, forecast_length, signal_type='seasonality', random=False, batch_size=32):
+    def get_x_y():
+        lin_space = np.linspace(-backcast_length, forecast_length, backcast_length + forecast_length)
+        if random:
+            offset = np.random.standard_normal() * 0.1
+        else:
+            offset = 1
+        if signal_type == 'trend':
+            a = lin_space + offset
+        elif signal_type == 'seasonality':
+            a = np.cos(2 * np.random.randint(low=1, high=3) * np.pi * lin_space)
+            a += np.cos(2 * np.random.randint(low=2, high=4) * np.pi * lin_space)
+            a += lin_space * offset + np.random.rand() * 0.1
+        elif signal_type == 'cos':
+            a = np.cos(2 * np.pi * lin_space)
+        else:
+            raise Exception('Unknown signal type.')
+
+        x = a[:backcast_length]
+        y = a[backcast_length:]
+
+        min_x, max_x = np.minimum(np.min(x), 0), np.max(np.abs(x))
+
+        x -= min_x
+        y -= min_x
+
+        x /= max_x
+        y /= max_x
+
+        return x.reshape(x.shape[0], x.shape[1], 1), None, y.reshape(y.shape[0], y.shape[1], 1)
+
+    def gen():
+        while True:
+            xx = []
+            yy = []
+            for i in range(batch_size):
+                x, y = get_x_y()
+                xx.append(x)
+                yy.append(y)
+            yield np.array(xx), np.array(yy)
+
+    return gen()
+
+
+def get_m4_data_multivariate(backcast_length, forecast_length, is_training=True):
+    # to be downloaded from https://www.mcompetitions.unic.ac.cy/the-dataset/
     
-    filename = 'data/m4/train/Daily-train.csv'
+    filename = '..examples/data/m4/train/Daily-train.csv'
     x_tl = []
     x_max = []
     headers = True
@@ -74,9 +165,9 @@ def get_m4_data(backcast_length, forecast_length, is_training=True):
     x_max = np.max(x_max)
         
     if is_training:
-        filename = 'data/m4/train/Daily-train.csv'
+        filename = '../examples/data/m4/train/Daily-train.csv'
     else:
-        filename = 'data/m4/val/Daily-test.csv'
+        filename = '../examples/data/m4/val/Daily-test.csv'
         
     x = np.array([]).reshape(0, backcast_length)
     y = np.array([]).reshape(0, forecast_length)
@@ -130,9 +221,10 @@ def process_data(filename):
 
 
 def get_kcg_data(backcast_length, forecast_length, is_training=True):
-    #https://physionet.org/content/mitdb/1.0.0/
+    # to be downloaded from https://physionet.org/content/mitdb/1.0.0/
+    # once downloaded should be put in ../examples/data/kcg/ 
     
-    dataset = process_data(filename='data/kcg/')
+    dataset = process_data(filename='../examples/data/kcg/')
     x_max = np.amax(np.abs(dataset[:195, :, :]), axis=(0,1))
 
     if is_training:
@@ -167,7 +259,7 @@ def get_kcg_data(backcast_length, forecast_length, is_training=True):
     return x, None, y
 
 def process_data_price():
-    filename = 'data/nrj/EPEX_spot_DA_auction_hour_prices_20070720-20170831.csv'
+    filename = '../examples/data/nrj/EPEX_spot_DA_auction_hour_prices_20070720-20170831.csv'
 
     x_tl = []
     headers = True
@@ -185,7 +277,7 @@ def process_data_price():
 
 
 def process_data_load():
-    filename = 'data/nrj/20150101-20170830-forecast_load_renewable_gen.csv'
+    filename = '../examples/data/nrj/20150101-20170830-forecast_load_renewable_gen.csv'
 
     x_tl = []
     headers = True
@@ -206,7 +298,7 @@ def process_data_load():
 
 
 def process_data_gen():
-    filename = 'data/nrj/20150101-20170830-gen_per_prod_type.csv'
+    filename = '../examples/data/nrj/20150101-20170830-gen_per_prod_type.csv'
 
     x_tl = []
     headers = True

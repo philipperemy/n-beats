@@ -26,10 +26,8 @@ class NBeatsNet:
                  loss='mae', 
                  steps=100001, 
                  best_perf=100., 
-                 plot_results=1000,
-                 x_train=None, e_train=None, y_train=None, 
-                 x_test=None, e_test=None, y_test=None, 
-                 get_data=None):
+                 plot_results=1000
+                 ):
         
         self.stack_types = stack_types
         self.nb_blocks_per_stack = nb_blocks_per_stack
@@ -89,7 +87,7 @@ class NBeatsNet:
         model.summary()
         
         self.nbeats = model
-        self.compile_model(loss=self.loss, learning_rate=self.learning_rate)
+        self.compile_model()
 
     def _r(self, layer_with_weights, stack_id):
         # mechanism to restore weights when block share the same weights.
@@ -153,9 +151,9 @@ class NBeatsNet:
         
         return backcast_, forecast_
         
-    def compile_model(self, loss, learning_rate):
-        optimizer = Adam(lr=learning_rate)
-        self.nbeats.compile(loss=loss, optimizer=optimizer)
+    def compile_model(self):
+        optimizer = Adam(lr=self.learning_rate)
+        self.nbeats.compile(loss=self.loss, optimizer=optimizer)
         
     def __getattr__(self, name):
         # https://github.com/faif/python-patterns

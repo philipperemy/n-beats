@@ -4,9 +4,11 @@ from argparse import ArgumentParser
 import matplotlib.pyplot as plt
 import numpy as np
 
-from data import dummy_data_generator, get_m4_data, get_nrj_data, get_kcg_data
-from model import NBeatsNet
+from data import dummy_data_generator_multivariate, get_m4_data_multivariate, get_nrj_data, get_kcg_data
+from nbeats_model import NBeatsNet
 
+
+np.random.seed(0)
 
 GENERIC_BLOCK = 'generic'
 TREND_BLOCK = 'trend'
@@ -33,7 +35,7 @@ def ensure_results_dir():
 
 def generate_data(backcast_length, forecast_length):
     def gen(num_samples):
-        return next(dummy_data_generator(backcast_length, forecast_length,
+        return next(dummy_data_generator_multivariate(backcast_length, forecast_length,
                                          signal_type='seasonality', random=True,
                                          batch_size=num_samples))
 
@@ -48,7 +50,7 @@ def train_model(model: NBeatsNet, task: str):
     if task == 'dummy':
         x_train, e_train, y_train, x_test, e_test, y_test = generate_data(model.backcast_length, model.forecast_length)
     elif task == 'm4':
-        x_test, e_test, y_test = get_m4_data(model.backcast_length, model.forecast_length, is_training=False)
+        x_test, e_test, y_test = get_m4_data_multivariate(model.backcast_length, model.forecast_length, is_training=False)
     elif task == 'kcg':
         x_test, e_test, y_test = get_kcg_data(model.backcast_length, model.forecast_length, is_training=False)
     elif task == 'nrj':
@@ -60,7 +62,7 @@ def train_model(model: NBeatsNet, task: str):
 
     for step in range(model.steps):
         if task == 'm4':
-            x_train, e_train, y_train = get_m4_data(model.backcast_length, model.forecast_length, is_training=True)
+            x_train, e_train, y_train = get_m4_data_multivariate(model.backcast_length, model.forecast_length, is_training=True)
         if task == 'kcg':
             x_train, e_train, y_train = get_kcg_data(model.backcast_length, model.forecast_length, is_training=True)
         if task == 'nrj':
@@ -128,54 +130,48 @@ def main():
     args = get_script_arguments()
 
     # m4
-    model = NBeatsNet(input_dim=1, exo_dim=0, backcast_length=10, forecast_length=2, 
-                    stack_types=[TREND_BLOCK, SEASONALITY_BLOCK], nb_blocks_per_stack=3, 
-                    thetas_dim = [4, 8], share_weights_in_stack=False,
-                    hidden_layer_units=256,
-                    learning_rate=1e-7, 
-                    loss='mae', 
-                    steps=100001, 
-                    best_perf=100., 
-                    plot_results=1000
-                    )
-    if args.test:
-        model.steps = 5
-    model.compile_model(loss='mae', learning_rate=1e-5)
-    train_model(model, 'm4')
+    if args.task == 'm4':
+        model = NBeatsNet(input_dim=1, exo_dim=0, backcast_length=10, forecast_length=1, 
+                          stack_types=[GENERIC_BLOCK, GENERIC_BLOCK], nb_blocks_per_stack=2, 
+                          thetas_dim = [4, 4], share_weights_in_stack=False,
+                          hidden_layer_units=128,
+                          learning_rate=1e-6, 
+                          loss='mae', 
+                          steps=1001, 
+                          best_perf=100., 
+                          plot_results=1
+                          )
     
     #kcg
-    # please uncompress the data/kcg folder before running the script 
-    model = NBeatsNet(input_dim=2, exo_dim=0, backcast_length=360, forecast_length=10, 
-                    stack_types=[TREND_BLOCK, SEASONALITY_BLOCK], nb_blocks_per_stack=3, 
-                    thetas_dim = [4, 8], share_weights_in_stack=False,
-                    hidden_layer_units=256,
-                    learning_rate=1e-5, 
-                    loss='mae', 
-                    steps=1001, 
-                    best_perf=100., 
-                    plot_results=10
-                    )
-    if args.test:
-        model.steps = 5
-    model.compile_model(loss='mae', learning_rate=1e-5)
-    train_model(model, 'kcg')
-    
-    #nrj
-    model = NBeatsNet(input_dim=1, exo_dim=0, backcast_length=10, forecast_length=2, 
-                stack_types=[TREND_BLOCK, SEASONALITY_BLOCK], nb_blocks_per_stack=3, 
-                thetas_dim = [4, 8], share_weights_in_stack=False,
-                hidden_layer_units=256,
-                learning_rate=1e-7, 
-                loss='mae', 
-                steps=100001, 
-                best_perf=100., 
-                plot_results=1
-                )
-    if args.test:
-        model.steps = 5
-    model.compile_model(loss='mae', learning_rate=1e-5)
-    train_model(model, 'nrj')
+    if args.task == 'kcg':
+        model = NBeatsNet(input_dim=2, exo_dim=0, backcast_length=360, forecast_length=10, 
+                          stack_types=[TREND_BLOCK, SEASONALITY_BLOCK], nb_blocks_per_stack=3, 
+                          thetas_dim = [4, 8], share_weights_in_stack=False,
+                          hidden_layer_units=256,
+                          learning_rate=1e-5, 
+                          loss='mae', 
+                          steps=10001, 
+                          best_perf=100., 
+                          plot_results=10
+                          )
 
+    #nrj
+    if args.task == 'nrj':
+        model = NBeatsNet(input_dim=1, exo_dim=2, backcast_length=10, forecast_length=1, 
+                          stack_types=[TREND_BLOCK, SEASONALITY_BLOCK], nb_blocks_per_stack=2, 
+                          thetas_dim = [4, 8], share_weights_in_stack=False,
+                          hidden_layer_units=128,
+                          learning_rate=1e-7, 
+                          loss='mae', 
+                          steps=100001, 
+                          best_perf=100., 
+                          plot_results=100
+                          )   
+    
+    model.compile_model()
+    if args.test:
+        model.steps = 5
+    train_model(model, args.task)
 
 if __name__ == '__main__':
     main()
