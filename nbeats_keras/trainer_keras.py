@@ -130,7 +130,7 @@ def main():
     args = get_script_arguments()
 
     # m4
-    if args.task == 'm4' ot if args.task == 'dummy':
+    if args.task == 'm4' or if args.task == 'dummy':
         model = NBeatsNet(input_dim=1, exo_dim=0, backcast_length=10, forecast_length=1, 
                           stack_types=[GENERIC_BLOCK, GENERIC_BLOCK], nb_blocks_per_stack=2, 
                           thetas_dim = [4, 4], share_weights_in_stack=False,
