@@ -5,7 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 
 from data import dummy_data_generator_multivariate, get_m4_data_multivariate, get_nrj_data, get_kcg_data
-from nbeats_model import NBeatsNet
+from model import NBeatsNet
 
 
 np.random.seed(0)
@@ -41,7 +41,7 @@ def generate_data(backcast_length, forecast_length):
 
     x_train, y_train = gen(6_000)
     x_test, y_test = gen(1_000)
-    return x_train, None, y_train, x_test, None, y_test
+    return x_train.reshape((x_train.shape[0], x_train.shape[1], 1)), None, y_train.reshape((y_train.shape[0], y_train.shape[1], 1)), x_test.reshape((x_test.shape[0], x_test.shape[1], 1)), None, y_test.reshape((y_test.shape[0], y_test.shape[1], 1))
 
 
 def train_model(model: NBeatsNet, task: str):

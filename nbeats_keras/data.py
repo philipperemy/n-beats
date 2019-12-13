@@ -125,7 +125,7 @@ def dummy_data_generator_multivariate(backcast_length, forecast_length, signal_t
         x /= max_x
         y /= max_x
 
-        return x.reshape(x.shape[0], x.shape[1], 1), None, y.reshape(y.shape[0], y.shape[1], 1)
+        return x, y
 
     def gen():
         while True:
@@ -143,7 +143,7 @@ def dummy_data_generator_multivariate(backcast_length, forecast_length, signal_t
 def get_m4_data_multivariate(backcast_length, forecast_length, is_training=True):
     # to be downloaded from https://www.mcompetitions.unic.ac.cy/the-dataset/
     
-    filename = '..examples/data/m4/train/Daily-train.csv'
+    filename = '../examples/data/m4/train/Daily-train.csv'
     x_tl = []
     x_max = []
     headers = True
