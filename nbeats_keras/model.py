@@ -21,12 +21,7 @@ class NBeatsNet:
                  nb_blocks_per_stack=3,
                  thetas_dim=[4, 8],
                  share_weights_in_stack=False,
-                 hidden_layer_units=256,
-                 learning_rate=1e-7, 
-                 loss='mae', 
-                 steps=100001, 
-                 best_perf=100., 
-                 plot_results=1000
+                 hidden_layer_units=256
                  ):
         
         self.stack_types = stack_types
@@ -36,11 +31,9 @@ class NBeatsNet:
         self.share_weights_in_stack = share_weights_in_stack
         self.backcast_length = backcast_length
         self.forecast_length = forecast_length
-        self.best_perf = best_perf
-        self.steps = steps
-        self.plot_results = plot_results
-        self.learning_rate = learning_rate
-        self.loss = loss
+        self.best_perf = np.inf
+        self.steps = 10001
+        self.plot_results = 100
         self.input_dim = input_dim
         self.exo_dim = exo_dim 
         self.input_shape = (self.backcast_length, self.input_dim)
@@ -49,15 +42,15 @@ class NBeatsNet:
         self.weights = {}
         assert len(self.stack_types) == len(self.thetas_dim)
 
-        X = Input(shape=self.input_shape)
+        X = Input(shape=self.input_shape, name='input_variable')
         x_ = {}
         for l in range(self.input_dim):
-            x_[l] = Lambda(lambda x: x[:, :, l])(X)
+            x_[l] = Lambda(lambda x: x[..., l])(X)
         e_ = {}
-        if self.exo_dim > 0:
-            E = Input(shape=self.exo_shape)
+        if self.has_exog():
+            E = Input(shape=self.exo_shape, name='exog_variables')
             for l in range(self.exo_dim):
-                e_[l] = Lambda(lambda x: x[:, :, l])(E)       
+                e_[l] = Lambda(lambda x: x[..., l])(E)
         y_ = {}
         
         for stack_id in range(len(self.stack_types)):
@@ -69,17 +62,17 @@ class NBeatsNet:
                     x_[l] = Subtract()([x_[l], backcast[l]])                    
                     if stack_id == 0 and block_id == 0:
                         y_[l] = forecast[l]
-                    else :
+                    else:
                         y_[l] = Add()([y_[l], forecast[l]])
         
         for l in range(self.input_dim):
             y_[l] = Reshape(target_shape=(self.forecast_length, 1))(y_[l])
         if self.input_dim > 1:
-            y_ = Concatenate(axis=-1)(list(y_.values()))
+            y_ = Concatenate(axis=-1)([y_[ll] for ll in range(self.input_dim)])
         else:
             y_ = y_[0]
             
-        if self.exo_dim > 0:
+        if self.has_exog():
             model = Model([X, E], y_)
         else:
             model = Model(X, y_)
@@ -87,7 +80,9 @@ class NBeatsNet:
         model.summary()
         
         self.nbeats = model
-        self.compile_model()
+
+    def has_exog(self):
+        return self.exo_dim > 0
 
     def _r(self, layer_with_weights, stack_id):
         # mechanism to restore weights when block share the same weights.
@@ -116,28 +111,28 @@ class NBeatsNet:
                 
         backcast_ = {}
         forecast_ = {}
-        d1 = reg(Dense(self.units, activation='relu'))
-        d2 = reg(Dense(self.units, activation='relu'))
-        d3 = reg(Dense(self.units, activation='relu'))
-        d4 = reg(Dense(self.units, activation='relu'))
+        d1 = reg(Dense(self.units, activation='relu', name=n('d1')))
+        d2 = reg(Dense(self.units, activation='relu', name=n('d2')))
+        d3 = reg(Dense(self.units, activation='relu', name=n('d3')))
+        d4 = reg(Dense(self.units, activation='relu', name=n('d4')))
         if stack_type == 'generic':
-            theta_b = reg(Dense(nb_poly, activation='linear'))
-            theta_f = reg(Dense(nb_poly, activation='linear'))
-            backcast = reg(Dense(self.backcast_length, activation='linear'))
-            forecast = reg(Dense(self.forecast_length, activation='linear'))
-        if stack_type == 'trend':
-            theta_f = theta_b = reg(Dense(nb_poly, activation='linear'))
+            theta_b = reg(Dense(nb_poly, activation='linear', name=n('theta_b')))
+            theta_f = reg(Dense(nb_poly, activation='linear', name=n('theta_f')))
+            backcast = reg(Dense(self.backcast_length, activation='linear', name=n('backcast')))
+            forecast = reg(Dense(self.forecast_length, activation='linear', name=n('forecast')))
+        elif stack_type == 'trend':
+            theta_f = theta_b = reg(Dense(nb_poly, activation='linear', name=n('theta_f_b')))
             backcast = Lambda(trend_model, arguments={"is_forecast": False, "backcast_length": self.backcast_length, "forecast_length": self.forecast_length})
             forecast = Lambda(trend_model, arguments={"is_forecast": True, "backcast_length": self.backcast_length, "forecast_length": self.forecast_length})
-        else: # 'seasonality'
-            theta_b = theta_f = reg(Dense(self.backcast_length, activation='linear'))
+        else:  # 'seasonality'
+            theta_b = theta_f = reg(Dense(self.backcast_length, activation='linear', name=n('theta_f_b')))
             backcast = Lambda(seasonality_model,
                               arguments={"is_forecast": False, "backcast_length": self.backcast_length, "forecast_length": self.forecast_length})
             forecast = Lambda(seasonality_model,
                               arguments={"is_forecast": True, "backcast_length": self.backcast_length, "forecast_length": self.forecast_length})
         for l in range(self.input_dim):
-            if self.exo_dim > 0:
-                d0 = Concatenate()([x[l]] + list(e.values()))
+            if self.has_exog():
+                d0 = Concatenate()([x[l]] + [e[ll] for ll in range(self.exo_dim)])
             else:
                 d0 = x[l]
             d1_ = d1(d0)
@@ -151,9 +146,9 @@ class NBeatsNet:
         
         return backcast_, forecast_
         
-    def compile_model(self):
-        optimizer = Adam(lr=self.learning_rate)
-        self.nbeats.compile(loss=self.loss, optimizer=optimizer)
+    def compile_model(self, loss, learning_rate):
+        optimizer = Adam(lr=learning_rate)
+        self.nbeats.compile(loss=loss, optimizer=optimizer)
         
     def __getattr__(self, name):
         # https://github.com/faif/python-patterns
@@ -171,12 +166,12 @@ class NBeatsNet:
 
 
 def linear_space(backcast_length, forecast_length, fwd_looking=True):
-    l = K.arange(-float(backcast_length), float(forecast_length), 1) / backcast_length
+    ls = K.arange(-float(backcast_length), float(forecast_length), 1) / backcast_length
     if fwd_looking:
-        l = l[backcast_length:]
+        ls = ls[backcast_length:]
     else:
-        l = l[:backcast_length]
-    return l
+        ls = ls[:backcast_length]
+    return ls
     
 
 def seasonality_model(thetas, backcast_length, forecast_length, is_forecast):
