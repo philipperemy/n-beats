@@ -1,8 +1,8 @@
 import csv
+from os import listdir
+
 import numpy as np
 import wfdb
-
-from os import listdir
 
 
 def dummy_data_generator(backcast_length, forecast_length, signal_type='seasonality', random=False, batch_size=32):
@@ -96,7 +96,8 @@ def get_m4_data(backcast_length, forecast_length, is_training=True):
     return x, y
 
 
-def dummy_data_generator_multivariate(backcast_length, forecast_length, signal_type='seasonality', random=False, batch_size=32):
+def dummy_data_generator_multivariate(backcast_length, forecast_length, signal_type='seasonality', random=False,
+                                      batch_size=32):
     def get_x_y():
         lin_space = np.linspace(-backcast_length, forecast_length, backcast_length + forecast_length)
         if random:
@@ -211,7 +212,8 @@ def get_m4_data_multivariate(backcast_length, forecast_length, is_training=True)
 def process_data(filename):
     ecg_list = listdir(filename)
     sample_list = [ecg[:-4] for ecg in ecg_list]
-    clean_sample_list = [ecg for ecg in sample_list if ecg not in ['102-0', 'ANNOTA', 'REC', 'SHA256SUMS', 'mitd', 'x_m']]
+    clean_sample_list = [ecg for ecg in sample_list if
+                         ecg not in ['102-0', 'ANNOTA', 'REC', 'SHA256SUMS', 'mitd', 'x_m']]
     all_samples = np.zeros((len(clean_sample_list), 650000, 2))
     for idx, ecg in enumerate(clean_sample_list):
         record = wfdb.rdrecord(filename + ecg)
@@ -247,8 +249,10 @@ def get_kcg_data(backcast_length, forecast_length, is_training=True):
             time_series_cleaned_forlearning_x[0] = time_series[j - backcast_length: j, :]
             time_series_cleaned_forlearning_y[0] = time_series[j:j + forecast_length, :]
         else:
-            time_series_cleaned_forlearning_x = np.zeros((time_series.shape[0] + 1 - (backcast_length + forecast_length), backcast_length, 2))
-            time_series_cleaned_forlearning_y = np.zeros((time_series.shape[0] + 1 - (backcast_length + forecast_length), forecast_length, 2))
+            time_series_cleaned_forlearning_x = np.zeros(
+                (time_series.shape[0] + 1 - (backcast_length + forecast_length), backcast_length, 2))
+            time_series_cleaned_forlearning_y = np.zeros(
+                (time_series.shape[0] + 1 - (backcast_length + forecast_length), forecast_length, 2))
             for j in range(backcast_length, time_series.shape[0] + 1 - forecast_length):
                 time_series_cleaned_forlearning_x[j - backcast_length] = time_series[j - backcast_length:j, :]
                 time_series_cleaned_forlearning_y[j - backcast_length] = time_series[j: j + forecast_length, :]
@@ -320,14 +324,15 @@ def process_data_gen():
 
 
 def get_x_y_data(backcast_length, forecast_length):
-
     x = np.array([]).reshape(0, backcast_length)
     y = np.array([]).reshape(0, forecast_length)
 
     time_series = process_data_price()[:-1]
 
-    time_series_cleaned_forlearning_x = np.zeros((time_series.shape[0] + 1 - (backcast_length + forecast_length), backcast_length))
-    time_series_cleaned_forlearning_y = np.zeros((time_series.shape[0] + 1 - (backcast_length + forecast_length), forecast_length))
+    time_series_cleaned_forlearning_x = np.zeros(
+        (time_series.shape[0] + 1 - (backcast_length + forecast_length), backcast_length))
+    time_series_cleaned_forlearning_y = np.zeros(
+        (time_series.shape[0] + 1 - (backcast_length + forecast_length), forecast_length))
     for j in range(backcast_length, time_series.shape[0] + 1 - forecast_length):
         time_series_cleaned_forlearning_x[j - backcast_length, :] = time_series[j - backcast_length:j]
         time_series_cleaned_forlearning_y[j - backcast_length, :] = time_series[j: j + forecast_length]
@@ -338,14 +343,15 @@ def get_x_y_data(backcast_length, forecast_length):
 
 
 def get_exo_var_data(backcast_length, forecast_length):
-
     e1 = np.array([]).reshape(0, backcast_length)
     e2 = np.array([]).reshape(0, backcast_length)
 
     time_series_1 = process_data_gen()
     time_series_2 = process_data_load()
-    time_series_cleaned_forlearning_1 = np.zeros((time_series_1.shape[0] + 1 - (backcast_length + forecast_length), backcast_length))
-    time_series_cleaned_forlearning_2 = np.zeros((time_series_1.shape[0] + 1 - (backcast_length + forecast_length), backcast_length))
+    time_series_cleaned_forlearning_1 = np.zeros(
+        (time_series_1.shape[0] + 1 - (backcast_length + forecast_length), backcast_length))
+    time_series_cleaned_forlearning_2 = np.zeros(
+        (time_series_1.shape[0] + 1 - (backcast_length + forecast_length), backcast_length))
     for j in range(backcast_length, time_series_1.shape[0] + 1 - forecast_length):
         time_series_cleaned_forlearning_1[j - backcast_length, :] = time_series_1[j - backcast_length:j]
         time_series_cleaned_forlearning_2[j - backcast_length, :] = time_series_2[j - backcast_length:j]
@@ -356,13 +362,12 @@ def get_exo_var_data(backcast_length, forecast_length):
 
 
 def get_nrj_data(backcast_length, forecast_length, is_training=True):
-
     x, y = get_x_y_data(backcast_length, forecast_length)
     e1, e2 = get_exo_var_data(backcast_length, forecast_length)
 
-    x_max = np.amax(np.abs(x[:90*x.shape[0]//100, :, :]), axis=(0, 1))
-    e1_max = np.amax(np.abs(e1[:90*x.shape[0]//100, :]), axis=(0, 1))
-    e2_max = np.amax(np.abs(e2[:90*x.shape[0]//100, :]), axis=(0, 1))
+    x_max = np.amax(np.abs(x[:90 * x.shape[0] // 100, :, :]), axis=(0, 1))
+    e1_max = np.amax(np.abs(e1[:90 * x.shape[0] // 100, :]), axis=(0, 1))
+    e2_max = np.amax(np.abs(e2[:90 * x.shape[0] // 100, :]), axis=(0, 1))
 
     x = x / x_max
     y = y / x_max
@@ -372,6 +377,6 @@ def get_nrj_data(backcast_length, forecast_length, is_training=True):
     e = np.concatenate((e1.reshape((e1.shape[0], e1.shape[1], 1)), e2.reshape((e2.shape[0], e2.shape[1], 1))), axis=-1)
 
     if is_training:
-        return x[:90*x.shape[0]//100], e[:90*x.shape[0]//100], y[:90*x.shape[0]//100]
+        return x[:90 * x.shape[0] // 100], e[:90 * x.shape[0] // 100], y[:90 * x.shape[0] // 100]
     else:
-        return x[90*x.shape[0]//100:], e[90*x.shape[0]//100:], y[90*x.shape[0]//100:]
+        return x[90 * x.shape[0] // 100:], e[90 * x.shape[0] // 100:], y[90 * x.shape[0] // 100:]
