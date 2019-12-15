@@ -153,9 +153,7 @@ def main():
                           thetas_dim=(4, 8), share_weights_in_stack=False, hidden_layer_units=128)
 
     model.compile_model(loss='mae', learning_rate=1e-5)
-    if args.test:
-        train_model(model, args.task, is_test=True)
-    train_model(model, args.task)
+    train_model(model, args.task, is_test=args.test)
 
 
 if __name__ == '__main__':
