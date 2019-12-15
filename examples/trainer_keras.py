@@ -36,12 +36,13 @@ def reshape_array(x):
 def generate_data(backcast_length, forecast_length):
     def gen(num_samples):
         return next(dummy_data_generator_multivariate(backcast_length, forecast_length,
-                    signal_type='seasonality', random=True, batch_size=num_samples))
+                                                      signal_type='seasonality', random=True, batch_size=num_samples))
 
     x_train, y_train = gen(6_000)
     x_test, y_test = gen(1_000)
 
-    x_train, y_train, x_test, y_test = reshape_array(x_train), reshape_array(y_train), reshape_array(x_test), reshape_array(y_test)
+    x_train, y_train, x_test, y_test = reshape_array(x_train), reshape_array(y_train), reshape_array(
+        x_test), reshape_array(y_test)
     return x_train, None, y_train, x_test, None, y_test
 
 
@@ -54,7 +55,8 @@ def train_model(model: NBeatsNet, task: str, best_perf=np.inf, max_steps=10001, 
     if task == 'dummy':
         x_train, e_train, y_train, x_test, e_test, y_test = generate_data(model.backcast_length, model.forecast_length)
     elif task == 'm4':
-        x_test, e_test, y_test = get_m4_data_multivariate(model.backcast_length, model.forecast_length, is_training=False)
+        x_test, e_test, y_test = get_m4_data_multivariate(model.backcast_length, model.forecast_length,
+                                                          is_training=False)
     elif task == 'kcg':
         x_test, e_test, y_test = get_kcg_data(model.backcast_length, model.forecast_length, is_training=False)
     elif task == 'nrj':
@@ -66,7 +68,8 @@ def train_model(model: NBeatsNet, task: str, best_perf=np.inf, max_steps=10001, 
 
     for step in range(max_steps):
         if task == 'm4':
-            x_train, e_train, y_train = get_m4_data_multivariate(model.backcast_length, model.forecast_length, is_training=True)
+            x_train, e_train, y_train = get_m4_data_multivariate(model.backcast_length, model.forecast_length,
+                                                                 is_training=True)
         if task == 'kcg':
             x_train, e_train, y_train = get_kcg_data(model.backcast_length, model.forecast_length, is_training=True)
         if task == 'nrj':
@@ -92,8 +95,10 @@ def train_model(model: NBeatsNet, task: str, best_perf=np.inf, max_steps=10001, 
                 best_perf = smape
                 model.save('results/n_beats_model_ongoing.h5')
             for l in range(model.input_dim):
-                plot_keras_model_predictions(model, False, step, x_train[0, :, l], y_train[0, :, l], predictions[0, :, l], axis=l)
-                plot_keras_model_predictions(model, True, step, x_test[0, :, l], y_test[0, :, l], validation_predictions[0, :, l], axis=l)
+                plot_keras_model_predictions(model, False, step, x_train[0, :, l], y_train[0, :, l],
+                                             predictions[0, :, l], axis=l)
+                plot_keras_model_predictions(model, True, step, x_test[0, :, l], y_test[0, :, l],
+                                             validation_predictions[0, :, l], axis=l)
 
     model.save('results/n_beats_model.h5')
 
@@ -105,8 +110,10 @@ def train_model(model: NBeatsNet, task: str, best_perf=np.inf, max_steps=10001, 
         validation_predictions = model.predict(x_test)
 
     for l in range(model.input_dim):
-        plot_keras_model_predictions(model, False, max_steps, x_train[10, :, l], y_train[10, :, l], predictions[10, :, l], axis=l)
-        plot_keras_model_predictions(model, True, max_steps, x_test[10, :, l], y_test[10, :, l], validation_predictions[10, :, l], axis=l)
+        plot_keras_model_predictions(model, False, max_steps, x_train[10, :, l], y_train[10, :, l],
+                                     predictions[10, :, l], axis=l)
+        plot_keras_model_predictions(model, True, max_steps, x_test[10, :, l], y_test[10, :, l],
+                                     validation_predictions[10, :, l], axis=l)
     print('smape=', get_metrics(y_test, validation_predictions)[0])
     print('error=', get_metrics(y_test, validation_predictions)[1])
 
@@ -124,7 +131,8 @@ def plot_keras_model_predictions(model, is_test, step, backcast, forecast, predi
     plt.plot(list(range(len(x_y) - model.forecast_length, len(x_y))), forecast.flatten(), color='g')
     plt.plot(list(range(len(x_y) - model.forecast_length, len(x_y))), prediction.flatten(), color='r')
     plt.scatter(range(len(x_y)), x_y.flatten(), color=['b'] * model.backcast_length + ['g'] * model.forecast_length)
-    plt.scatter(list(range(len(x_y) - model.forecast_length, len(x_y))), prediction.flatten(), color=['r'] * model.forecast_length)
+    plt.scatter(list(range(len(x_y) - model.forecast_length, len(x_y))), prediction.flatten(),
+                color=['r'] * model.forecast_length)
     plt.legend(legend)
     plt.savefig(title)
     plt.close()
