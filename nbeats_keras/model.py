@@ -13,13 +13,13 @@ class NBeatsNet:
     SEASONALITY_BLOCK = 'seasonality'
     
     def __init__(self, 
-                 input_dim, 
-                 exo_dim, 
-                 backcast_length, 
-                 forecast_length, 
-                 stack_types=[TREND_BLOCK, SEASONALITY_BLOCK],
+                 input_dim=1,
+                 exo_dim=0,
+                 backcast_length=10,
+                 forecast_length=2,
+                 stack_types=(TREND_BLOCK, SEASONALITY_BLOCK),
                  nb_blocks_per_stack=3,
-                 thetas_dim=[4, 8],
+                 thetas_dim=(4, 8),
                  share_weights_in_stack=False,
                  hidden_layer_units=256
                  ):
@@ -31,9 +31,6 @@ class NBeatsNet:
         self.share_weights_in_stack = share_weights_in_stack
         self.backcast_length = backcast_length
         self.forecast_length = forecast_length
-        self.best_perf = np.inf
-        self.steps = 10001
-        self.plot_results = 100
         self.input_dim = input_dim
         self.exo_dim = exo_dim 
         self.input_shape = (self.backcast_length, self.input_dim)
@@ -148,7 +145,7 @@ class NBeatsNet:
         
     def compile_model(self, loss, learning_rate):
         optimizer = Adam(lr=learning_rate)
-        self.nbeats.compile(loss=loss, optimizer=optimizer)
+        self.compile(loss=loss, optimizer=optimizer)
         
     def __getattr__(self, name):
         # https://github.com/faif/python-patterns
@@ -199,10 +196,3 @@ def forecast_concatenation(thetas, backcast_length, forecast_length, is_forecast
     T = K.transpose(K.stack([t ** i for i in range(p)], axis=0))
     T = K.cast(T, np.float32)
     return K.dot(thetas, K.transpose(T))
-
-
-def get_metrics(y_true, y_hat):
-    error = np.mean(np.square(y_true - y_hat))
-    smape = np.mean(2 * np.abs(y_true - y_hat) / (np.abs(y_true) + np.abs(y_hat)))
-
-    return smape, error

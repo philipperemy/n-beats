@@ -8,9 +8,9 @@ from data import dummy_data_generator_multivariate, get_m4_data_multivariate, ge
 from nbeats_keras.model import NBeatsNet
 
 
-GENERIC_BLOCK = 'generic'
-TREND_BLOCK = 'trend'
-SEASONALITY_BLOCK = 'seasonality'
+GENERIC_BLOCK = NBeatsNet.GENERIC_BLOCK
+TREND_BLOCK = NBeatsNet.TREND_BLOCK
+SEASONALITY_BLOCK = NBeatsNet.SEASONALITY_BLOCK
     
     
 def get_script_arguments():
@@ -31,6 +31,13 @@ def ensure_results_dir():
         os.makedirs('results/test')
 
 
+def reshape_array(x):
+    assert x.shape > 1, 'data should be in a format: samples, timesteps, channel'
+    if len(x.shape) == 2:
+        nb_samples, nb_timestamps = x.shape
+        return x.reshape((nb_samples, nb_timestamps, 1))
+
+
 def generate_data(backcast_length, forecast_length):
     def gen(num_samples):
         return next(dummy_data_generator_multivariate(backcast_length, forecast_length,
@@ -39,10 +46,12 @@ def generate_data(backcast_length, forecast_length):
 
     x_train, y_train = gen(6_000)
     x_test, y_test = gen(1_000)
-    return x_train.reshape((x_train.shape[0], x_train.shape[1], 1)), None, y_train.reshape((y_train.shape[0], y_train.shape[1], 1)), x_test.reshape((x_test.shape[0], x_test.shape[1], 1)), None, y_test.reshape((y_test.shape[0], y_test.shape[1], 1))
+
+    x_train, y_train, x_test, y_test = reshape_array(x_train), reshape_array(y_train), reshape_array(x_test), reshape_array(y_test)
+    return x_train, None, y_train, x_test, None, y_test
 
 
-def train_model(model: NBeatsNet, task: str):
+def train_model(model: NBeatsNet, task: str, best_perf=np.inf, steps=10001, plot_results=100):
     ensure_results_dir()
 
     if task == 'dummy':
@@ -56,9 +65,9 @@ def train_model(model: NBeatsNet, task: str):
     else:
         raise Exception('Unknown task.')
 
-    print('x_test.shape=', x_test.shape)  
+    print('x_test.shape=', x_test.shape)
 
-    for step in range(model.steps):
+    for step in range(steps):
         if task == 'm4':
             x_train, e_train, y_train = get_m4_data_multivariate(model.backcast_length, model.forecast_length, is_training=True)
         if task == 'kcg':
@@ -71,10 +80,10 @@ def train_model(model: NBeatsNet, task: str):
         else:
             model.train_on_batch(x_train, y_train)
         
-        if step % model.plot_results == 0:
+        if step % plot_results == 0:
             print('step=', step)
             model.save('results/n_beats_model_' + str(step) + '.h5')
-            if model.exo_dim > 0:
+            if model.has_exog():
                 predictions = model.predict([x_train, e_train])
                 validation_predictions = model.predict([x_test, e_test])
             else:
@@ -82,14 +91,14 @@ def train_model(model: NBeatsNet, task: str):
                 validation_predictions = model.predict(x_test)
             smape = get_metrics(y_test, validation_predictions)[0]
             print('smape=', smape)
-            if smape < model.best_perf:
-                model.best_perf = smape
+            if smape < best_perf:
+                best_perf = smape
                 model.save('results/n_beats_model_ongoing.h5')
             for l in range(model.input_dim):
                 plot_keras_model_predictions(model, False, step, x_train[0, :, l], y_train[0, :, l], predictions[0, :, l], axis=l)
                 plot_keras_model_predictions(model, True, step, x_test[0, :, l], y_test[0, :, l], validation_predictions[0, :, l], axis=l)
 
-    model.nbeats.save('results/n_beats_model.h5')
+    model.save('results/n_beats_model.h5')
 
     if model.has_exog():
         predictions = model.predict([x_train, e_train])
@@ -130,22 +139,22 @@ def main():
     # m4
     if args.task in ['m4', 'dummy']:
         model = NBeatsNet(input_dim=1, exo_dim=0, backcast_length=10, forecast_length=1, 
-                          stack_types=[GENERIC_BLOCK, GENERIC_BLOCK], nb_blocks_per_stack=2, 
-                          thetas_dim=[4, 4], share_weights_in_stack=True,
+                          stack_types=(GENERIC_BLOCK, GENERIC_BLOCK), nb_blocks_per_stack=2,
+                          thetas_dim=(4, 4), share_weights_in_stack=True,
                           hidden_layer_units=128)
     
     # kcg
     elif args.task == 'kcg':
         model = NBeatsNet(input_dim=2, exo_dim=0, backcast_length=360, forecast_length=10, 
-                          stack_types=[TREND_BLOCK, SEASONALITY_BLOCK], nb_blocks_per_stack=3, 
-                          thetas_dim=[4, 8], share_weights_in_stack=False,
+                          stack_types=(TREND_BLOCK, SEASONALITY_BLOCK), nb_blocks_per_stack=3,
+                          thetas_dim=(4, 8), share_weights_in_stack=False,
                           hidden_layer_units=256)
 
     # nrj
     elif args.task == 'nrj':
         model = NBeatsNet(input_dim=1, exo_dim=2, backcast_length=10, forecast_length=1, 
-                          stack_types=[TREND_BLOCK, SEASONALITY_BLOCK], nb_blocks_per_stack=2, 
-                          thetas_dim=[4, 8], share_weights_in_stack=False,
+                          stack_types=(TREND_BLOCK, SEASONALITY_BLOCK), nb_blocks_per_stack=2,
+                          thetas_dim=(4, 8), share_weights_in_stack=False,
                           hidden_layer_units=128)
 
     model.compile_model(loss='mae', learning_rate=1e-5)
