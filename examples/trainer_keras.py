@@ -105,8 +105,8 @@ def train_model(model: NBeatsNet, task: str, best_perf=np.inf, max_steps=10001, 
         validation_predictions = model.predict(x_test)
 
     for l in range(model.input_dim):
-        plot_keras_model_predictions(model, False, model.steps, x_train[10, :, l], y_train[10, :, l], predictions[10, :, l], axis=l)
-        plot_keras_model_predictions(model, True, model.steps, x_test[10, :, l], y_test[10, :, l], validation_predictions[10, :, l], axis=l)
+        plot_keras_model_predictions(model, False, max_steps, x_train[10, :, l], y_train[10, :, l], predictions[10, :, l], axis=l)
+        plot_keras_model_predictions(model, True, max_steps, x_test[10, :, l], y_test[10, :, l], validation_predictions[10, :, l], axis=l)
     print('smape=', get_metrics(y_test, validation_predictions)[0])
     print('error=', get_metrics(y_test, validation_predictions)[1])
 
