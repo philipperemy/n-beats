@@ -1,8 +1,7 @@
 import numpy as np
-
 from keras import backend as K
-from keras.layers import Input, Dense, Lambda, Subtract, Add, Reshape
 from keras.layers import Concatenate
+from keras.layers import Input, Dense, Lambda, Subtract, Add, Reshape
 from keras.models import Model
 from keras.optimizers import Adam
 
@@ -119,14 +118,18 @@ class NBeatsNet:
             forecast = reg(Dense(self.forecast_length, activation='linear', name=n('forecast')))
         elif stack_type == 'trend':
             theta_f = theta_b = reg(Dense(nb_poly, activation='linear', name=n('theta_f_b')))
-            backcast = Lambda(trend_model, arguments={"is_forecast": False, "backcast_length": self.backcast_length, "forecast_length": self.forecast_length})
-            forecast = Lambda(trend_model, arguments={"is_forecast": True, "backcast_length": self.backcast_length, "forecast_length": self.forecast_length})
+            backcast = Lambda(trend_model, arguments={"is_forecast": False, "backcast_length": self.backcast_length,
+                                                      "forecast_length": self.forecast_length})
+            forecast = Lambda(trend_model, arguments={"is_forecast": True, "backcast_length": self.backcast_length,
+                                                      "forecast_length": self.forecast_length})
         else:  # 'seasonality'
             theta_b = theta_f = reg(Dense(self.backcast_length, activation='linear', name=n('theta_f_b')))
             backcast = Lambda(seasonality_model,
-                              arguments={"is_forecast": False, "backcast_length": self.backcast_length, "forecast_length": self.forecast_length})
+                              arguments={"is_forecast": False, "backcast_length": self.backcast_length,
+                                         "forecast_length": self.forecast_length})
             forecast = Lambda(seasonality_model,
-                              arguments={"is_forecast": True, "backcast_length": self.backcast_length, "forecast_length": self.forecast_length})
+                              arguments={"is_forecast": True, "backcast_length": self.backcast_length,
+                                         "forecast_length": self.forecast_length})
         for l in range(self.input_dim):
             if self.has_exog():
                 d0 = Concatenate()([x[l]] + [e[ll] for ll in range(self.exo_dim)])
