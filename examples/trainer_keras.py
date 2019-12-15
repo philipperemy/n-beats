@@ -45,7 +45,7 @@ def generate_data(backcast_length, forecast_length):
     return x_train, None, y_train, x_test, None, y_test
 
 
-def train_model(model: NBeatsNet, task: str, best_perf=np.inf, steps=10001, plot_results=100):
+def train_model(model: NBeatsNet, task: str, best_perf=np.inf, max_steps=10001, plot_results=100):
     ensure_results_dir()
 
     if task == 'dummy':
@@ -61,7 +61,7 @@ def train_model(model: NBeatsNet, task: str, best_perf=np.inf, steps=10001, plot
 
     print('x_test.shape=', x_test.shape)
 
-    for step in range(steps):
+    for step in range(max_steps):
         if task == 'm4':
             x_train, e_train, y_train = get_m4_data_multivariate(model.backcast_length, model.forecast_length, is_training=True)
         if task == 'kcg':
@@ -151,8 +151,9 @@ def main():
 
     model.compile_model(loss='mae', learning_rate=1e-5)
     if args.test:
-        model.steps = 5
-    train_model(model, args.task)
+        train_model(model, args.task, max_steps=5)
+    else:
+        train_model(model, args.task)
 
 
 if __name__ == '__main__':
