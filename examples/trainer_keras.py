@@ -45,8 +45,11 @@ def generate_data(backcast_length, forecast_length):
     return x_train, None, y_train, x_test, None, y_test
 
 
-def train_model(model: NBeatsNet, task: str, best_perf=np.inf, max_steps=10001, plot_results=100):
+def train_model(model: NBeatsNet, task: str, best_perf=np.inf, max_steps=10001, plot_results=100, is_test=False):
     ensure_results_dir()
+    # if is_test then override max_steps argument
+    if is_test:
+        max_steps = 5
 
     if task == 'dummy':
         x_train, e_train, y_train, x_test, e_test, y_test = generate_data(model.backcast_length, model.forecast_length)
@@ -151,9 +154,8 @@ def main():
 
     model.compile_model(loss='mae', learning_rate=1e-5)
     if args.test:
-        train_model(model, args.task, max_steps=5)
-    else:
-        train_model(model, args.task)
+        train_model(model, args.task, is_test=True)
+    train_model(model, args.task)
 
 
 if __name__ == '__main__':
