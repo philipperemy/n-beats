@@ -27,7 +27,7 @@ def ensure_results_dir():
 
 
 def reshape_array(x):
-    assert x.shape > 1, 'data should be in a format: samples, timesteps, channel'
+    assert len(x.shape) == 2, 'input np.array should be in the format: samples, timesteps'
     if len(x.shape) == 2:
         nb_samples, nb_timestamps = x.shape
         return x.reshape((nb_samples, nb_timestamps, 1))
