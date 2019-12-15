@@ -68,7 +68,7 @@ def train_model(model: NBeatsNet, task: str, best_perf=np.inf, steps=10001, plot
             x_train, e_train, y_train = get_kcg_data(model.backcast_length, model.forecast_length, is_training=True)
         if task == 'nrj':
             x_train, e_train, y_train = get_nrj_data(model.backcast_length, model.forecast_length, is_training=True)
-        
+
         if model.has_exog():
             model.train_on_batch([x_train, e_train], y_train)
         else:
@@ -135,7 +135,7 @@ def main():
         model = NBeatsNet(input_dim=1, exo_dim=0, backcast_length=10, forecast_length=1,
                           stack_types=(NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK), nb_blocks_per_stack=2,
                           thetas_dim=(4, 4), share_weights_in_stack=True, hidden_layer_units=128)
-    
+
     # kcg
     elif args.task == 'kcg':
         model = NBeatsNet(input_dim=2, exo_dim=0, backcast_length=360, forecast_length=10,
