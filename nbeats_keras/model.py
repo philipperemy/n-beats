@@ -123,7 +123,7 @@ class NBeatsNet:
             forecast = Lambda(trend_model, arguments={"is_forecast": True, "backcast_length": self.backcast_length,
                                                       "forecast_length": self.forecast_length})
         else:  # 'seasonality'
-            theta_b = theta_f = reg(Dense(self.backcast_length, activation='linear', use_bias=False, name=n('theta_f_b')))
+            theta_b = theta_f = reg(Dense(nb_poly, activation='linear', use_bias=False, name=n('theta_f_b')))
             backcast = Lambda(seasonality_model,
                               arguments={"is_forecast": False, "backcast_length": self.backcast_length,
                                          "forecast_length": self.forecast_length})
