@@ -16,7 +16,7 @@ class ModelTest(unittest.TestCase):
             share_weights_in_stack=False,
             hidden_layer_units=64)
 
-        self.assertEqual(m.count_params(), 81408)
+        self.assertEqual(m.count_params(), 81792)
 
         m2 = NBeatsNet(stack_types=(
             NBeatsNet.TREND_BLOCK,
@@ -29,7 +29,7 @@ class ModelTest(unittest.TestCase):
             share_weights_in_stack=True,  # just change it to True.
             hidden_layer_units=64)
 
-        self.assertEqual(m2.count_params(), 81408 // 3)  # nb_blocks_per_stack=3
+        self.assertEqual(m2.count_params(), 81792 // 3)  # nb_blocks_per_stack=3
 
         m3 = NBeatsNet(stack_types=(
             NBeatsNet.TREND_BLOCK,
