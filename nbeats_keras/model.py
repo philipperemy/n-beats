@@ -112,18 +112,18 @@ class NBeatsNet:
         d3 = reg(Dense(self.units, activation='relu', name=n('d3')))
         d4 = reg(Dense(self.units, activation='relu', name=n('d4')))
         if stack_type == 'generic':
-            theta_b = reg(Dense(nb_poly, activation='linear', name=n('theta_b')))
-            theta_f = reg(Dense(nb_poly, activation='linear', name=n('theta_f')))
+            theta_b = reg(Dense(nb_poly, activation='linear', use_bias=False, name=n('theta_b')))
+            theta_f = reg(Dense(nb_poly, activation='linear', use_bias=False, name=n('theta_f')))
             backcast = reg(Dense(self.backcast_length, activation='linear', name=n('backcast')))
             forecast = reg(Dense(self.forecast_length, activation='linear', name=n('forecast')))
         elif stack_type == 'trend':
-            theta_f = theta_b = reg(Dense(nb_poly, activation='linear', name=n('theta_f_b')))
+            theta_f = theta_b = reg(Dense(nb_poly, activation='linear', use_bias=False, name=n('theta_f_b')))
             backcast = Lambda(trend_model, arguments={"is_forecast": False, "backcast_length": self.backcast_length,
                                                       "forecast_length": self.forecast_length})
             forecast = Lambda(trend_model, arguments={"is_forecast": True, "backcast_length": self.backcast_length,
                                                       "forecast_length": self.forecast_length})
         else:  # 'seasonality'
-            theta_b = theta_f = reg(Dense(self.backcast_length, activation='linear', name=n('theta_f_b')))
+            theta_b = theta_f = reg(Dense(nb_poly, activation='linear', use_bias=False, name=n('theta_f_b')))
             backcast = Lambda(seasonality_model,
                               arguments={"is_forecast": False, "backcast_length": self.backcast_length,
                                          "forecast_length": self.forecast_length})

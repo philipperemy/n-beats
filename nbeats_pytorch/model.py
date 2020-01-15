@@ -110,10 +110,10 @@ class Block(nn.Module):
         self.device = device
         self.backcast_linspace, self.forecast_linspace = linspace(backcast_length, forecast_length)
         if share_thetas:
-            self.theta_f_fc = self.theta_b_fc = nn.Linear(units, thetas_dim)
+            self.theta_f_fc = self.theta_b_fc = nn.Linear(units, thetas_dim, bias=False)
         else:
-            self.theta_b_fc = nn.Linear(units, thetas_dim)
-            self.theta_f_fc = nn.Linear(units, thetas_dim)
+            self.theta_b_fc = nn.Linear(units, thetas_dim, bias=False)
+            self.theta_f_fc = nn.Linear(units, thetas_dim, bias=False)
 
     def forward(self, x):
         x = F.relu(self.fc1(x.to(self.device)))
