@@ -37,13 +37,14 @@ def dummy_data_generator(backcast_length, forecast_length, signal_type='seasonal
         return x, y
 
     def gen():
-        xx = []
-        yy = []
-        for i in range(batch_size):
-            x, y = get_x_y()
-            xx.append(x)
-            yy.append(y)
-        yield np.array(xx), np.array(yy)
+        while True:
+            xx = []
+            yy = []
+            for i in range(batch_size):
+                x, y = get_x_y()
+                xx.append(x)
+                yy.append(y)
+            yield np.array(xx), np.array(yy)
 
     return gen()
 
@@ -128,13 +129,14 @@ def dummy_data_generator_multivariate(backcast_length, forecast_length, signal_t
         return x, y
 
     def gen():
-        xx = []
-        yy = []
-        for i in range(batch_size):
-            x, y = get_x_y()
-            xx.append(x)
-            yy.append(y)
-        yield np.array(xx), np.array(yy)
+        while True:
+            xx = []
+            yy = []
+            for i in range(batch_size):
+                x, y = get_x_y()
+                xx.append(x)
+                yy.append(y)
+            yield np.array(xx), np.array(yy)
 
     return gen()
 
