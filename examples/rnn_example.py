@@ -42,7 +42,9 @@ def univariate_data(dataset, start_index, end_index, history_size, target_size):
         # Reshape data from (history_size,) to (history_size, 1)
         data.append(np.reshape(dataset[indices], (history_size, 1)))
         labels.append(dataset[i + target_size])
-    return np.array(data), np.array(labels)
+    data = np.array(data)
+    labels = np.array(labels)
+    return data.reshape(data.shape[0], data.shape[1], 1), labels.reshape(labels.shape[0], 1, 1)
 
 
 TRAIN_SPLIT = 300000
@@ -114,13 +116,13 @@ print('fit()')
 class EvaluateModelCallback(Callback):
 
     def on_epoch_end(self, epoch, logs=None):
-        b3_val_uni = m.predict(x_val_uni[..., 0])[..., 0]
+        b3_val_uni = m.predict(x_val_uni)
         print(f'[{epoch}] b3_val_uni.shape=', b3_val_uni.shape)
         print(np.mean(np.abs(b3_val_uni - y_val_uni)))
         print(np.mean(np.abs(dn.apply_inv(b3_val_uni) - dn.apply_inv(y_val_uni))))
         print('*' * 80)
 
 
-m.fit(x_train_uni[..., 0], y_train_uni,
+m.fit(x_train_uni, y_train_uni,
       epochs=20, validation_split=0.1, shuffle=True,
       callbacks=[EvaluateModelCallback()])
