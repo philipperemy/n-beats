@@ -20,7 +20,8 @@ class NBeatsNet:
                  nb_blocks_per_stack=3,
                  thetas_dim=(4, 8),
                  share_weights_in_stack=False,
-                 hidden_layer_units=256
+                 hidden_layer_units=256,
+                 experimental_features=False
                  ):
 
         self.stack_types = stack_types
@@ -36,6 +37,7 @@ class NBeatsNet:
         self.exo_shape = (self.backcast_length, self.exo_dim)
         self.output_shape = (self.forecast_length, self.input_dim)
         self.weights = {}
+        self.experimental_features = experimental_features
         assert len(self.stack_types) == len(self.thetas_dim)
 
         X = Input(shape=self.input_shape, name='input_variable')
@@ -123,7 +125,10 @@ class NBeatsNet:
             forecast = Lambda(trend_model, arguments={"is_forecast": True, "backcast_length": self.backcast_length,
                                                       "forecast_length": self.forecast_length})
         else:  # 'seasonality'
-            theta_b = reg(Dense(self.forecast_length, activation='linear', use_bias=False, name=n('theta_b')))
+            if self.experimental_features:
+                theta_b = reg(Dense(self.backcast_length, activation='linear', use_bias=False, name=n('theta_b')))
+            else:
+                theta_b = reg(Dense(self.forecast_length, activation='linear', use_bias=False, name=n('theta_b')))
             theta_f = reg(Dense(self.forecast_length, activation='linear', use_bias=False, name=n('theta_f')))
             backcast = Lambda(seasonality_model,
                               arguments={"is_forecast": False, "backcast_length": self.backcast_length,
