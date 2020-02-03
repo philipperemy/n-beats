@@ -140,7 +140,7 @@ class SeasonalityBlock(Block):
                                                    forecast_length, share_thetas=True)
         else:
             super(SeasonalityBlock, self).__init__(units, forecast_length, device, backcast_length,
-                                               forecast_length, share_thetas=True)
+                                                   forecast_length, share_thetas=True)
 
     def forward(self, x):
         x = super(SeasonalityBlock, self).forward(x)
