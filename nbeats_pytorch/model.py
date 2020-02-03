@@ -131,9 +131,9 @@ class Block(nn.Module):
 
 class SeasonalityBlock(Block):
 
-    def __init__(self, units, thetas_dim, device, backcast_length=10, forecast_length=5, experimental_features=1):
-        super(SeasonalityBlock, self).__init__(units, experimental_features * forecast_length, device, backcast_length,
-                                               forecast_length, share_thetas=False)
+    def __init__(self, units, thetas_dim, device, backcast_length=10, forecast_length=5):
+        super(SeasonalityBlock, self).__init__(units, forecast_length, device, backcast_length,
+                                               forecast_length, share_thetas=True)
 
     def forward(self, x):
         x = super(SeasonalityBlock, self).forward(x)
