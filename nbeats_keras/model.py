@@ -123,7 +123,8 @@ class NBeatsNet:
             forecast = Lambda(trend_model, arguments={"is_forecast": True, "backcast_length": self.backcast_length,
                                                       "forecast_length": self.forecast_length})
         else:  # 'seasonality'
-            theta_b = theta_f = reg(Dense(self.backcast_length, activation='linear', use_bias=False, name=n('theta_f_b')))
+            theta_b = reg(Dense(self.forecast_length, activation='linear', use_bias=False, name=n('theta_b')))
+            theta_f = reg(Dense(self.forecast_length, activation='linear', use_bias=False, name=n('theta_f')))
             backcast = Lambda(seasonality_model,
                               arguments={"is_forecast": False, "backcast_length": self.backcast_length,
                                          "forecast_length": self.forecast_length})
@@ -180,20 +181,15 @@ def seasonality_model(thetas, backcast_length, forecast_length, is_forecast):
     t = linear_space(backcast_length, forecast_length, fwd_looking=is_forecast)
     s1 = K.stack([K.cos(2 * np.pi * i * t) for i in range(p1)], axis=0)
     s2 = K.stack([K.sin(2 * np.pi * i * t) for i in range(p2)], axis=0)
-    S = K.concatenate([s1, s2], axis=0)
+    if p == 1:
+        S = s2
+    else:
+        S = K.concatenate([s1, s2], axis=0)
     S = K.cast(S, np.float32)
     return K.dot(thetas, S)
 
 
 def trend_model(thetas, backcast_length, forecast_length, is_forecast):
-    p = thetas.shape[-1]
-    t = linear_space(backcast_length, forecast_length, fwd_looking=is_forecast)
-    T = K.transpose(K.stack([t ** i for i in range(p)], axis=0))
-    T = K.cast(T, np.float32)
-    return K.dot(thetas, K.transpose(T))
-
-
-def forecast_concatenation(thetas, backcast_length, forecast_length, is_forecast):
     p = thetas.shape[-1]
     t = linear_space(backcast_length, forecast_length, fwd_looking=is_forecast)
     T = K.transpose(K.stack([t ** i for i in range(p)], axis=0))
