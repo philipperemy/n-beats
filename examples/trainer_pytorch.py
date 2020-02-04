@@ -65,7 +65,8 @@ def main():
                     backcast_length=backcast_length,
                     hidden_layer_units=1024,
                     share_weights_in_stack=False,
-                    experimental_features=False)
+                    experimental_features=False,
+                    experimental_features_harmonics=None)
 
     # net = NBeatsNet(device=device,
     #                 stack_types=[NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK],
