@@ -22,7 +22,7 @@ class NBeatsNet:
                  share_weights_in_stack=False,
                  hidden_layer_units=256,
                  experimental_features=False,
-                 experimental_features_harmonics = None
+                 experimental_features_harmonics=None
                  ):
 
         self.stack_types = stack_types
