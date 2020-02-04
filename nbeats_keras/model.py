@@ -21,7 +21,8 @@ class NBeatsNet:
                  thetas_dim=(4, 8),
                  share_weights_in_stack=False,
                  hidden_layer_units=256,
-                 experimental_features=False
+                 experimental_features=False,
+                 experimental_features_harmonics = None
                  ):
 
         self.stack_types = stack_types
@@ -38,7 +39,11 @@ class NBeatsNet:
         self.output_shape = (self.forecast_length, self.input_dim)
         self.weights = {}
         self.experimental_features = experimental_features
+        self.experimental_features_harmonics = experimental_features_harmonics
         assert len(self.stack_types) == len(self.thetas_dim)
+        assert not(not self.experimental_features and self.experimental_features_harmonics)
+        assert not(self.experimental_features_harmonics and
+                   self.experimental_features_harmonics * self.forecast_length > self.backcast_length)
 
         X = Input(shape=self.input_shape, name='input_variable')
         x_ = {}
@@ -126,7 +131,12 @@ class NBeatsNet:
                                                       "forecast_length": self.forecast_length})
         else:  # 'seasonality'
             if self.experimental_features:
-                theta_b = reg(Dense(self.backcast_length, activation='linear', use_bias=False, name=n('theta_b')))
+                if self.experimental_features_harmonics:
+                    theta_b = reg(Dense(self.experimental_features_harmonics * self.forecast_length,
+                                        activation='linear', use_bias=False, name=n('theta_b')))
+                else:
+                    theta_b = reg(Dense(self.backcast_length,
+                                        activation='linear', use_bias=False, name=n('theta_b')))
             else:
                 theta_b = reg(Dense(self.forecast_length, activation='linear', use_bias=False, name=n('theta_b')))
             theta_f = reg(Dense(self.forecast_length, activation='linear', use_bias=False, name=n('theta_f')))
