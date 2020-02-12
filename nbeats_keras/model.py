@@ -21,7 +21,7 @@ class NBeatsNet:
                  thetas_dim=(4, 8),
                  share_weights_in_stack=False,
                  hidden_layer_units=256,
-                 experimental_features=False
+                 nb_harmonics=None
                  ):
 
         self.stack_types = stack_types
@@ -37,7 +37,7 @@ class NBeatsNet:
         self.exo_shape = (self.backcast_length, self.exo_dim)
         self.output_shape = (self.forecast_length, self.input_dim)
         self.weights = {}
-        self.experimental_features = experimental_features
+        self.nb_harmonics = nb_harmonics
         assert len(self.stack_types) == len(self.thetas_dim)
 
         X = Input(shape=self.input_shape, name='input_variable')
@@ -46,7 +46,7 @@ class NBeatsNet:
             x_[l] = Lambda(lambda x: x[..., l])(X)
         e_ = {}
         if self.has_exog():
-            E = Input(shape=self.exo_shape, name='exog_variables')
+            E = Input(shape=self.exo_shape, name='exos_variables')
             for l in range(self.exo_dim):
                 e_[l] = Lambda(lambda x: x[..., l])(E)
         y_ = {}
@@ -125,8 +125,8 @@ class NBeatsNet:
             forecast = Lambda(trend_model, arguments={"is_forecast": True, "backcast_length": self.backcast_length,
                                                       "forecast_length": self.forecast_length})
         else:  # 'seasonality'
-            if self.experimental_features:
-                theta_b = reg(Dense(self.backcast_length, activation='linear', use_bias=False, name=n('theta_b')))
+            if self.nb_harmonics:
+                theta_b = reg(Dense(self.nb_harmonics, activation='linear', use_bias=False, name=n('theta_b')))
             else:
                 theta_b = reg(Dense(self.forecast_length, activation='linear', use_bias=False, name=n('theta_b')))
             theta_f = reg(Dense(self.forecast_length, activation='linear', use_bias=False, name=n('theta_f')))
