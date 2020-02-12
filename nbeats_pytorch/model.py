@@ -18,14 +18,14 @@ class NBeatsNet(nn.Module):
                  thetas_dims=(4, 8),
                  share_weights_in_stack=False,
                  hidden_layer_units=256,
-                 experimental_features=False):
+                 nb_harmonics=None):
         super(NBeatsNet, self).__init__()
         self.forecast_length = forecast_length
         self.backcast_length = backcast_length
         self.hidden_layer_units = hidden_layer_units
         self.nb_blocks_per_stack = nb_blocks_per_stack
         self.share_weights_in_stack = share_weights_in_stack
-        self.experimental_features = experimental_features
+        self.nb_harmonics = nb_harmonics
         self.stack_types = stack_types
         self.stacks = []
         self.thetas_dim = thetas_dims
@@ -47,7 +47,7 @@ class NBeatsNet(nn.Module):
                 block = blocks[-1]  # pick up the last one when we share weights.
             else:
                 block = block_init(self.hidden_layer_units, self.thetas_dim[stack_id],
-                                   self.device, self.backcast_length, self.forecast_length, self.experimental_features)
+                                   self.device, self.backcast_length, self.forecast_length, self.nb_harmonics)
                 self.parameters.extend(block.parameters())
             print(f'     | -- {block}')
             blocks.append(block)
@@ -98,8 +98,7 @@ def linspace(backcast_length, forecast_length):
 
 class Block(nn.Module):
 
-    def __init__(self, units, thetas_dim, device, backcast_length=10, forecast_length=5, share_thetas=False,
-                 experimental_features=False):
+    def __init__(self, units, thetas_dim, device, backcast_length=10, forecast_length=5, share_thetas=False):
         super(Block, self).__init__()
         self.units = units
         self.thetas_dim = thetas_dim
@@ -134,9 +133,9 @@ class Block(nn.Module):
 
 class SeasonalityBlock(Block):
 
-    def __init__(self, units, thetas_dim, device, backcast_length=10, forecast_length=5, experimental_features=False):
-        if experimental_features:
-            super(SeasonalityBlock, self).__init__(units, backcast_length, device, backcast_length,
+    def __init__(self, units, thetas_dim, device, backcast_length=10, forecast_length=5, nb_harmonics=None):
+        if nb_harmonics:
+            super(SeasonalityBlock, self).__init__(units, nb_harmonics, device, backcast_length,
                                                    forecast_length, share_thetas=True)
         else:
             super(SeasonalityBlock, self).__init__(units, forecast_length, device, backcast_length,
@@ -151,7 +150,7 @@ class SeasonalityBlock(Block):
 
 class TrendBlock(Block):
 
-    def __init__(self, units, thetas_dim, device, backcast_length=10, forecast_length=5, experimental_features=False):
+    def __init__(self, units, thetas_dim, device, backcast_length=10, forecast_length=5, nb_harmonics=None):
         super(TrendBlock, self).__init__(units, thetas_dim, device, backcast_length,
                                          forecast_length, share_thetas=True)
 

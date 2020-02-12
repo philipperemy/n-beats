@@ -65,7 +65,7 @@ def main():
                     backcast_length=backcast_length,
                     hidden_layer_units=1024,
                     share_weights_in_stack=False,
-                    experimental_features=False)
+                    nb_harmonics=None)
 
     # net = NBeatsNet(device=device,
     #                 stack_types=[NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK],
@@ -74,8 +74,8 @@ def main():
     #                 nb_blocks_per_stack=3,
     #                 backcast_length=backcast_length,
     #                 hidden_layer_units=128,
-    #                 share_weights_in_stack=False,
-    #                 experimental_features=False)
+    #                 share_weights_in_stack=False
+    #                 )
 
     optimiser = optim.Adam(net.parameters())
 
