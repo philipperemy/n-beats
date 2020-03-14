@@ -30,7 +30,7 @@ Command to install N-Beats with Pytorch: `make install-pytorch`
 
 Jupyter notebook: [NBeats.ipynb](examples/NBeats.ipynb): `make run-jupyter`.
 
-
+Toy example [simple_example.py](https://github.com/philipperemy/n-beats/blob/master/examples/simple_example.py)
 
 ## Model
 
