@@ -2,7 +2,6 @@ import csv
 from os import listdir
 
 import numpy as np
-import wfdb
 
 
 def dummy_data_generator(backcast_length, forecast_length, signal_type='seasonality', random=False, batch_size=32):
@@ -210,6 +209,7 @@ def get_m4_data_multivariate(backcast_length, forecast_length, is_training=True)
 
 
 def process_data(filename):
+    import wfdb
     ecg_list = listdir(filename)
     sample_list = [ecg[:-4] for ecg in ecg_list]
     clean_sample_list = [ecg for ecg in sample_list if

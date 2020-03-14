@@ -7,7 +7,7 @@ FRAMEWORK = os.getenv('FRAMEWORK', 'keras')  # keras, pytorch.
 
 # common packages.
 INSTALL_REQUIRES = [
-    'numpy==1.16.2',
+    'numpy>=1.18.1',
     'pandas>=0.25.3',
     'matplotlib>=3.0'
 ]
