@@ -68,7 +68,10 @@ def train_model(model: NBeatsNet, task: str, best_perf=np.inf, max_steps=10001, 
 
     x_train, y_train, e_train = None, None, None
     for step in range(max_steps):
-        if task == 'm4':
+        if task == 'dummy':
+            x_train, e_train, y_train, x_test, e_test, y_test = generate_data(model.backcast_length,
+                                                                              model.forecast_length)
+        elif task == 'm4':
             x_train, e_train, y_train = get_m4_data_multivariate(model.backcast_length, model.forecast_length,
                                                                  is_training=True)
         elif task == 'kcg':
