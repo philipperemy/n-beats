@@ -3,8 +3,8 @@ from argparse import ArgumentParser
 
 import matplotlib.pyplot as plt
 import numpy as np
-
 from data import dummy_data_generator_multivariate, get_m4_data_multivariate, get_nrj_data, get_kcg_data
+
 from nbeats_keras.model import NBeatsNet
 
 
@@ -62,18 +62,21 @@ def train_model(model: NBeatsNet, task: str, best_perf=np.inf, max_steps=10001, 
     elif task == 'nrj':
         x_test, e_test, y_test = get_nrj_data(model.backcast_length, model.forecast_length, is_training=False)
     else:
-        raise Exception('Unknown task.')
+        raise ValueError('Invalid task.')
 
     print('x_test.shape=', x_test.shape)
 
+    x_train, y_train, e_train = None, None, None
     for step in range(max_steps):
         if task == 'm4':
             x_train, e_train, y_train = get_m4_data_multivariate(model.backcast_length, model.forecast_length,
                                                                  is_training=True)
-        if task == 'kcg':
+        elif task == 'kcg':
             x_train, e_train, y_train = get_kcg_data(model.backcast_length, model.forecast_length, is_training=True)
-        if task == 'nrj':
+        elif task == 'nrj':
             x_train, e_train, y_train = get_nrj_data(model.backcast_length, model.forecast_length, is_training=True)
+        else:
+            raise ValueError('Invalid task.')
 
         if model.has_exog():
             model.train_on_batch([x_train, e_train], y_train)
@@ -94,11 +97,11 @@ def train_model(model: NBeatsNet, task: str, best_perf=np.inf, max_steps=10001, 
             if smape < best_perf:
                 best_perf = smape
                 model.save('results/n_beats_model_ongoing.h5')
-            for l in range(model.input_dim):
-                plot_keras_model_predictions(model, False, step, x_train[0, :, l], y_train[0, :, l],
-                                             predictions[0, :, l], axis=l)
-                plot_keras_model_predictions(model, True, step, x_test[0, :, l], y_test[0, :, l],
-                                             validation_predictions[0, :, l], axis=l)
+            for k in range(model.input_dim):
+                plot_keras_model_predictions(model, False, step, x_train[0, :, k], y_train[0, :, k],
+                                             predictions[0, :, k], axis=k)
+                plot_keras_model_predictions(model, True, step, x_test[0, :, k], y_test[0, :, k],
+                                             validation_predictions[0, :, k], axis=k)
 
     model.save('results/n_beats_model.h5')
 
@@ -109,11 +112,11 @@ def train_model(model: NBeatsNet, task: str, best_perf=np.inf, max_steps=10001, 
         predictions = model.predict(x_train)
         validation_predictions = model.predict(x_test)
 
-    for l in range(model.input_dim):
-        plot_keras_model_predictions(model, False, max_steps, x_train[10, :, l], y_train[10, :, l],
-                                     predictions[10, :, l], axis=l)
-        plot_keras_model_predictions(model, True, max_steps, x_test[10, :, l], y_test[10, :, l],
-                                     validation_predictions[10, :, l], axis=l)
+    for k in range(model.input_dim):
+        plot_keras_model_predictions(model, False, max_steps, x_train[10, :, k], y_train[10, :, k],
+                                     predictions[10, :, k], axis=k)
+        plot_keras_model_predictions(model, True, max_steps, x_test[10, :, k], y_test[10, :, k],
+                                     validation_predictions[10, :, k], axis=k)
     print('smape=', get_metrics(y_test, validation_predictions)[0])
     print('error=', get_metrics(y_test, validation_predictions)[1])
 
@@ -141,25 +144,22 @@ def plot_keras_model_predictions(model, is_test, step, backcast, forecast, predi
 def main():
     args = get_script_arguments()
 
-    # m4
     if args.task in ['m4', 'dummy']:
         model = NBeatsNet(backcast_length=10, forecast_length=1,
                           stack_types=(NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK), nb_blocks_per_stack=2,
                           thetas_dim=(4, 4), share_weights_in_stack=True, hidden_layer_units=128)
-
-    # kcg
     elif args.task == 'kcg':
         model = NBeatsNet(input_dim=2, backcast_length=360, forecast_length=10,
                           stack_types=(NBeatsNet.TREND_BLOCK, NBeatsNet.SEASONALITY_BLOCK), nb_blocks_per_stack=3,
                           thetas_dim=(4, 8), share_weights_in_stack=False,
                           hidden_layer_units=256)
-
-    # nrj
     elif args.task == 'nrj':
         model = NBeatsNet(input_dim=1, exo_dim=2, backcast_length=10, forecast_length=1,
                           stack_types=(NBeatsNet.TREND_BLOCK, NBeatsNet.SEASONALITY_BLOCK), nb_blocks_per_stack=2,
                           thetas_dim=(4, 8), share_weights_in_stack=False, hidden_layer_units=128,
                           nb_harmonics=10)
+    else:
+        raise ValueError('Unknown task.')
 
     model.compile_model(loss='mae', learning_rate=1e-5)
     train_model(model, args.task, is_test=args.test)

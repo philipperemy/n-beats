@@ -40,15 +40,17 @@ class NBeatsNet:
         self.nb_harmonics = nb_harmonics
         assert len(self.stack_types) == len(self.thetas_dim)
 
-        X = Input(shape=self.input_shape, name='input_variable')
+        x = Input(shape=self.input_shape, name='input_variable')
         x_ = {}
-        for l in range(self.input_dim):
-            x_[l] = Lambda(lambda x: x[..., l])(X)
+        for k in range(self.input_dim):
+            x_[k] = Lambda(lambda z: z[..., k])(x)
         e_ = {}
         if self.has_exog():
-            E = Input(shape=self.exo_shape, name='exos_variables')
-            for l in range(self.exo_dim):
-                e_[l] = Lambda(lambda x: x[..., l])(E)
+            e = Input(shape=self.exo_shape, name='exos_variables')
+            for k in range(self.exo_dim):
+                e_[k] = Lambda(lambda z: z[..., k])(e)
+        else:
+            e = None
         y_ = {}
 
         for stack_id in range(len(self.stack_types)):
@@ -56,31 +58,36 @@ class NBeatsNet:
             nb_poly = self.thetas_dim[stack_id]
             for block_id in range(self.nb_blocks_per_stack):
                 backcast, forecast = self.create_block(x_, e_, stack_id, block_id, stack_type, nb_poly)
-                for l in range(self.input_dim):
-                    x_[l] = Subtract()([x_[l], backcast[l]])
+                for k in range(self.input_dim):
+                    x_[k] = Subtract()([x_[k], backcast[k]])
                     if stack_id == 0 and block_id == 0:
-                        y_[l] = forecast[l]
+                        y_[k] = forecast[k]
                     else:
-                        y_[l] = Add()([y_[l], forecast[l]])
+                        y_[k] = Add()([y_[k], forecast[k]])
 
-        for l in range(self.input_dim):
-            y_[l] = Reshape(target_shape=(self.forecast_length, 1))(y_[l])
+        for k in range(self.input_dim):
+            y_[k] = Reshape(target_shape=(self.forecast_length, 1))(y_[k])
         if self.input_dim > 1:
             y_ = Concatenate(axis=-1)([y_[ll] for ll in range(self.input_dim)])
         else:
             y_ = y_[0]
 
         if self.has_exog():
-            model = Model([X, E], y_)
+            model = Model([x, e], y_)
         else:
-            model = Model(X, y_)
+            model = Model(x, y_)
 
         model.summary()
 
-        self.nbeats = model
+        self.n_beats = model
 
     def has_exog(self):
         return self.exo_dim > 0
+
+    @staticmethod
+    def load(filepath, custom_objects=None, compile=True):
+        from tensorflow.keras.models import load_model
+        return load_model(filepath, custom_objects, compile)
 
     def _r(self, layer_with_weights, stack_id):
         # mechanism to restore weights when block share the same weights.
@@ -136,19 +143,19 @@ class NBeatsNet:
             forecast = Lambda(seasonality_model,
                               arguments={"is_forecast": True, "backcast_length": self.backcast_length,
                                          "forecast_length": self.forecast_length})
-        for l in range(self.input_dim):
+        for k in range(self.input_dim):
             if self.has_exog():
-                d0 = Concatenate()([x[l]] + [e[ll] for ll in range(self.exo_dim)])
+                d0 = Concatenate()([x[k]] + [e[ll] for ll in range(self.exo_dim)])
             else:
-                d0 = x[l]
+                d0 = x[k]
             d1_ = d1(d0)
             d2_ = d2(d1_)
             d3_ = d3(d2_)
             d4_ = d4(d3_)
             theta_f_ = theta_f(d4_)
             theta_b_ = theta_b(d4_)
-            backcast_[l] = backcast(theta_b_)
-            forecast_[l] = forecast(theta_f_)
+            backcast_[k] = backcast(theta_b_)
+            forecast_[k] = forecast(theta_f_)
 
         return backcast_, forecast_
 
@@ -158,9 +165,9 @@ class NBeatsNet:
 
     def __getattr__(self, name):
         # https://github.com/faif/python-patterns
-        # model.predict() instead of model.nbeats.predict()
+        # model.predict() instead of model.n_beats.predict()
         # same for fit(), train_on_batch()...
-        attr = getattr(self.nbeats, name)
+        attr = getattr(self.n_beats, name)
 
         if not callable(attr):
             return attr
@@ -187,16 +194,16 @@ def seasonality_model(thetas, backcast_length, forecast_length, is_forecast):
     s1 = K.stack([K.cos(2 * np.pi * i * t) for i in range(p1)], axis=0)
     s2 = K.stack([K.sin(2 * np.pi * i * t) for i in range(p2)], axis=0)
     if p == 1:
-        S = s2
+        s = s2
     else:
-        S = K.concatenate([s1, s2], axis=0)
-    S = K.cast(S, np.float32)
-    return K.dot(thetas, S)
+        s = K.concatenate([s1, s2], axis=0)
+    s = K.cast(s, np.float32)
+    return K.dot(thetas, s)
 
 
 def trend_model(thetas, backcast_length, forecast_length, is_forecast):
     p = thetas.shape[-1]
     t = linear_space(backcast_length, forecast_length, fwd_looking=is_forecast)
-    T = K.transpose(K.stack([t ** i for i in range(p)], axis=0))
-    T = K.cast(T, np.float32)
-    return K.dot(thetas, K.transpose(T))
+    t = K.transpose(K.stack([t ** i for i in range(p)], axis=0))
+    t = K.cast(t, np.float32)
+    return K.dot(thetas, K.transpose(t))
