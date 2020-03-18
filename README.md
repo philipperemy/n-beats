@@ -30,10 +30,7 @@ Command to install N-Beats with Pytorch: `make install-pytorch`
 
 Jupyter notebook: [NBeats.ipynb](examples/NBeats.ipynb): `make run-jupyter`.
 
-Here is a toy example on how to use this model:
-
-- train
-- predict
+Here is a toy example on how to use this model (train and predict):
 
 ```python
 import numpy as np
