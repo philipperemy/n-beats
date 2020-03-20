@@ -98,7 +98,8 @@ def linspace(backcast_length, forecast_length):
 
 class Block(nn.Module):
 
-    def __init__(self, units, thetas_dim, device, backcast_length=10, forecast_length=5, share_thetas=False):
+    def __init__(self, units, thetas_dim, device, backcast_length=10, forecast_length=5, share_thetas=False,
+                 nb_harmonics=None):
         super(Block, self).__init__()
         self.units = units
         self.thetas_dim = thetas_dim
@@ -163,7 +164,7 @@ class TrendBlock(Block):
 
 class GenericBlock(Block):
 
-    def __init__(self, units, thetas_dim, device, backcast_length=10, forecast_length=5):
+    def __init__(self, units, thetas_dim, device, backcast_length=10, forecast_length=5, nb_harmonics=None):
         super(GenericBlock, self).__init__(units, thetas_dim, device, backcast_length, forecast_length)
 
         self.backcast_fc = nn.Linear(thetas_dim, backcast_length)
