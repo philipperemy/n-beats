@@ -58,24 +58,14 @@ def main():
 
     print('--- Model ---')
     net = NBeatsNet(device=device,
-                    stack_types=[NBeatsNet.TREND_BLOCK, NBeatsNet.SEASONALITY_BLOCK],
+                    stack_types=[NBeatsNet.TREND_BLOCK, NBeatsNet.SEASONALITY_BLOCK, NBeatsNet.GENERIC_BLOCK],
                     forecast_length=forecast_length,
-                    thetas_dims=[2, 8],
+                    thetas_dims=[2, 8, 3],
                     nb_blocks_per_stack=3,
                     backcast_length=backcast_length,
                     hidden_layer_units=1024,
                     share_weights_in_stack=False,
                     nb_harmonics=None)
-
-    # net = NBeatsNet(device=device,
-    #                 stack_types=[NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK],
-    #                 forecast_length=forecast_length,
-    #                 thetas_dims=[7, 8],
-    #                 nb_blocks_per_stack=3,
-    #                 backcast_length=backcast_length,
-    #                 hidden_layer_units=128,
-    #                 share_weights_in_stack=False
-    #                 )
 
     optimiser = optim.Adam(net.parameters())
 
