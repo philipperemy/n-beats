@@ -26,6 +26,10 @@ Command to install N-Beats with Keras: `make install-keras`
 
 Command to install N-Beats with Pytorch: `make install-pytorch`
 
+### Run on the GPU
+
+To force the utilization of the GPU, run: `pip uninstall -y tensorflow && pip install tensorflow-gpu`.
+
 ## Example
 
 Jupyter notebook: [NBeats.ipynb](examples/NBeats.ipynb): `make run-jupyter`.
