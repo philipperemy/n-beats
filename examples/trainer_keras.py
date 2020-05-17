@@ -3,8 +3,8 @@ from argparse import ArgumentParser
 
 import matplotlib.pyplot as plt
 import numpy as np
-from data import dummy_data_generator_multivariate, get_m4_data_multivariate, get_nrj_data, get_kcg_data
 
+from data import dummy_data_generator_multivariate, get_m4_data_multivariate, get_nrj_data, get_kcg_data
 from nbeats_keras.model import NBeatsNet
 
 

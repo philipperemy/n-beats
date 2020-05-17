@@ -21,8 +21,7 @@ class NBeatsNet:
                  thetas_dim=(4, 8),
                  share_weights_in_stack=False,
                  hidden_layer_units=256,
-                 nb_harmonics=None
-                 ):
+                 nb_harmonics=None):
 
         self.stack_types = stack_types
         self.nb_blocks_per_stack = nb_blocks_per_stack

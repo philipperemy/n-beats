@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from keras.callbacks import Callback
+
 from nbeats_keras.model import NBeatsNet
 
 pd.set_option('display.max_rows', None)
