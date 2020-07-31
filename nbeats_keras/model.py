@@ -77,11 +77,11 @@ class NBeatsNet:
         else:
             model = Model(x, y_)
 
-        model.summary()
-
         self.n_beats = model
 
     def has_exog(self):
+        # exo/exog is short for "exogenous variable", i.e. any input 
+        # features other than the target timeseries itself.
         return self.exo_dim > 0
 
     @staticmethod
