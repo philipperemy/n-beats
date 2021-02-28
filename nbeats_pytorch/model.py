@@ -31,7 +31,7 @@ class NBeatsNet(nn.Module):
         self.thetas_dim = thetas_dims
         self.parameters = []
         self.device = device
-        print(f'| N-Beats')
+        print('| N-Beats')
         for stack_id in range(len(self.stack_types)):
             self.stacks.append(self.create_stack(stack_id))
         self.parameters = nn.ParameterList(self.parameters)
