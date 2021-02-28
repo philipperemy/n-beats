@@ -82,3 +82,16 @@ def main():
 if __name__ == '__main__':
     main()
 ```
+
+## Citation
+
+```
+@misc{NBeatsPRemy,
+  author = {Philippe Remy},
+  title = {N-BEATS: Neural basis expansion analysis for interpretable time series forecasting},
+  year = {2020},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/philipperemy/n-beats}},
+}
+```
