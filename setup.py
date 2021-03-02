@@ -7,23 +7,22 @@ FRAMEWORK = os.getenv('FRAMEWORK', 'keras')  # keras, pytorch.
 
 # common packages.
 INSTALL_REQUIRES = [
-    'numpy>=1.18.1',
-    'pandas>=0.25.3',
-    'matplotlib>=3.0'
+    'numpy',
+    'pandas',
+    'matplotlib'
 ]
 
 if FRAMEWORK == 'keras':
     LIB_PACKAGE = ['nbeats_keras']
     INSTALL_REQUIRES.extend([
         'keras',
-        'tensorflow==2.0'
+        'tensorflow'
     ])
 
 elif FRAMEWORK == 'pytorch':
     LIB_PACKAGE = ['nbeats_pytorch']
     INSTALL_REQUIRES.extend([
         'torch',
-        'torchvision'
     ])
 else:
     raise ValueError('Unknown framework.')
