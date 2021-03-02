@@ -1,22 +1,32 @@
 import numpy as np
+from tensorflow.keras.utils import plot_model
 
-from nbeats_keras.model import NBeatsNet
+from nbeats_keras.model import NBeatsNet, GenericStackDef
 
 
 def main():
     # https://keras.io/layers/recurrent/
-    num_samples, time_steps, input_dim, output_dim = 50_000, 10, 1, 1
+    forecast_length = 1
+    backcast_length = 10
+    num_samples = 50_000
 
     # Definition of the model.
-    model = NBeatsNet(backcast_length=time_steps, forecast_length=output_dim,
-                      stack_types=(NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK), nb_blocks_per_stack=2,
-                      thetas_dim=(4, 4), share_weights_in_stack=True, hidden_layer_units=64)
+    model = NBeatsNet(
+        forecast_length=forecast_length,  # H
+        backcast_length=backcast_length,  # n in n*H
+        stacks_def=tuple([GenericStackDef()] * 30)
+    )
+
+    plot_model(model.n_beats, to_file='model.png',
+               show_shapes=True,
+               show_layer_names=True,
+               expand_nested=True)
 
     # Definition of the objective function and the optimizer.
     model.compile_model(loss='mae', learning_rate=1e-5)
 
     # Definition of the data. The problem to solve is to find f such as | f(x) - y | -> 0.
-    x = np.random.uniform(size=(num_samples, time_steps, input_dim))
+    x = np.random.uniform(size=(num_samples, backcast_length))
     y = np.mean(x, axis=1, keepdims=True)
 
     # Split data into training and testing datasets.
