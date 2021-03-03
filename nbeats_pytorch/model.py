@@ -1,5 +1,6 @@
 import pickle
 import random
+from time import time
 
 import numpy as np
 import torch
@@ -91,7 +92,7 @@ class NBeatsNet(nn.Module):
         self._opt = optim.Adam(lr=learning_rate, params=self.parameters())
         self._loss = loss_
 
-    def fit(self, x_train, y_train, validation_data=None, epochs=10, batch_size=128):
+    def fit(self, x_train, y_train, validation_data=None, epochs=10, batch_size=32):
 
         def split(arr, size):
             arrays = []
@@ -110,6 +111,7 @@ class NBeatsNet(nn.Module):
             random.shuffle(shuffled_indices)
             self.train()
             train_loss = []
+            timer = time()
             for batch_id in shuffled_indices:
                 batch_x, batch_y = x_train_list[batch_id], y_train_list[batch_id]
                 self._opt.zero_grad()
@@ -118,6 +120,7 @@ class NBeatsNet(nn.Module):
                 train_loss.append(loss.item())
                 loss.backward()
                 self._opt.step()
+            elapsed_time = time() - timer
             train_loss = np.mean(train_loss)
 
             test_loss = '[undefined]'
@@ -126,7 +129,13 @@ class NBeatsNet(nn.Module):
                 self.eval()
                 _, forecast = self(torch.tensor(x_test, dtype=torch.float).to(self.device))
                 test_loss = self._loss(forecast, squeeze_last_dim(torch.tensor(y_test, dtype=torch.float))).item()
-            print(f'epoch = {epoch}, train_loss = {train_loss:.4f}, test_loss = {test_loss:.4f}.')
+
+            num_samples = len(x_train_list)
+            time_per_step = int(elapsed_time / num_samples * 1000)
+            print(f'Epoch {str(epoch + 1).zfill(len(str(epochs)))}/{epochs}')
+            print(f'{num_samples}/{num_samples} [==============================] - '
+                  f'{int(elapsed_time)}s {time_per_step}ms/step - '
+                  f'loss: {train_loss:.4f} - val_loss: {test_loss:.4f}')
 
     def predict(self, x, return_backcast=False):
         self.eval()
