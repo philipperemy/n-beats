@@ -21,8 +21,7 @@ class NBeatsNet:
                  thetas_dim=(4, 8),
                  share_weights_in_stack=False,
                  hidden_layer_units=256,
-                 nb_harmonics=None
-                 ):
+                 nb_harmonics=None):
 
         self.stack_types = stack_types
         self.nb_blocks_per_stack = nb_blocks_per_stack
@@ -80,7 +79,7 @@ class NBeatsNet:
         self.n_beats = model
 
     def has_exog(self):
-        # exo/exog is short for "exogenous variable", i.e. any input
+        # exo/exog is short for 'exogenous variable', i.e. any input
         # features other than the target timeseries itself.
         return self.exo_dim > 0
 
@@ -127,10 +126,10 @@ class NBeatsNet:
             forecast = reg(Dense(self.forecast_length, activation='linear', name=n('forecast')))
         elif stack_type == 'trend':
             theta_f = theta_b = reg(Dense(nb_poly, activation='linear', use_bias=False, name=n('theta_f_b')))
-            backcast = Lambda(trend_model, arguments={"is_forecast": False, "backcast_length": self.backcast_length,
-                                                      "forecast_length": self.forecast_length})
-            forecast = Lambda(trend_model, arguments={"is_forecast": True, "backcast_length": self.backcast_length,
-                                                      "forecast_length": self.forecast_length})
+            backcast = Lambda(trend_model, arguments={'is_forecast': False, 'backcast_length': self.backcast_length,
+                                                      'forecast_length': self.forecast_length})
+            forecast = Lambda(trend_model, arguments={'is_forecast': True, 'backcast_length': self.backcast_length,
+                                                      'forecast_length': self.forecast_length})
         else:  # 'seasonality'
             if self.nb_harmonics:
                 theta_b = reg(Dense(self.nb_harmonics, activation='linear', use_bias=False, name=n('theta_b')))
@@ -138,11 +137,11 @@ class NBeatsNet:
                 theta_b = reg(Dense(self.forecast_length, activation='linear', use_bias=False, name=n('theta_b')))
             theta_f = reg(Dense(self.forecast_length, activation='linear', use_bias=False, name=n('theta_f')))
             backcast = Lambda(seasonality_model,
-                              arguments={"is_forecast": False, "backcast_length": self.backcast_length,
-                                         "forecast_length": self.forecast_length})
+                              arguments={'is_forecast': False, 'backcast_length': self.backcast_length,
+                                         'forecast_length': self.forecast_length})
             forecast = Lambda(seasonality_model,
-                              arguments={"is_forecast": True, "backcast_length": self.backcast_length,
-                                         "forecast_length": self.forecast_length})
+                              arguments={'is_forecast': True, 'backcast_length': self.backcast_length,
+                                         'forecast_length': self.forecast_length})
         for k in range(self.input_dim):
             if self.has_exog():
                 d0 = Concatenate()([x[k]] + [e[ll] for ll in range(self.exo_dim)])
@@ -178,21 +177,17 @@ class NBeatsNet:
         return wrapper
 
 
-def linear_space(backcast_length, forecast_length, fwd_looking=True):
-    ls = K.arange(-float(backcast_length), float(forecast_length), 1) / backcast_length
-    if fwd_looking:
-        ls = ls[backcast_length:]
-    else:
-        ls = ls[:backcast_length]
-    return ls
+def linear_space(backcast_length, forecast_length, is_forecast=True):
+    ls = K.arange(-float(backcast_length), float(forecast_length), 1) / forecast_length
+    return ls[backcast_length:] if is_forecast else ls[:backcast_length]
 
 
 def seasonality_model(thetas, backcast_length, forecast_length, is_forecast):
     p = thetas.get_shape().as_list()[-1]
     p1, p2 = (p // 2, p // 2) if p % 2 == 0 else (p // 2, p // 2 + 1)
-    t = linear_space(backcast_length, forecast_length, fwd_looking=is_forecast)
-    s1 = K.stack([K.cos(2 * np.pi * i * t) for i in range(p1)], axis=0)
-    s2 = K.stack([K.sin(2 * np.pi * i * t) for i in range(p2)], axis=0)
+    t = linear_space(backcast_length, forecast_length, is_forecast=is_forecast)
+    s1 = K.stack([K.cos(2 * np.pi * i * t) for i in range(p1)])
+    s2 = K.stack([K.sin(2 * np.pi * i * t) for i in range(p2)])
     if p == 1:
         s = s2
     else:
@@ -203,7 +198,7 @@ def seasonality_model(thetas, backcast_length, forecast_length, is_forecast):
 
 def trend_model(thetas, backcast_length, forecast_length, is_forecast):
     p = thetas.shape[-1]
-    t = linear_space(backcast_length, forecast_length, fwd_looking=is_forecast)
-    t = K.transpose(K.stack([t ** i for i in range(p)], axis=0))
+    t = linear_space(backcast_length, forecast_length, is_forecast=is_forecast)
+    t = K.transpose(K.stack([t ** i for i in range(p)]))
     t = K.cast(t, np.float32)
     return K.dot(thetas, K.transpose(t))
