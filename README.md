@@ -63,10 +63,11 @@ def main():
                                   hidden_layer_units=64)
 
     # Definition of the objective function and the optimizer.
-    model_keras.compile_model(loss='mae', learning_rate=1e-5)
-    model_pytorch.compile_model(loss='mae', learning_rate=1e-5)
+    model_keras.compile_model(loss='mae', learning_rate=1e-4)
+    model_pytorch.compile_model(loss='mae', learning_rate=1e-4)
 
     # Definition of the data. The problem to solve is to find f such as | f(x) - y | -> 0.
+    # where f = np.mean.
     x = np.random.uniform(size=(num_samples, time_steps, input_dim))
     y = np.mean(x, axis=1, keepdims=True)
 
@@ -75,8 +76,10 @@ def main():
     x_train, y_train, x_test, y_test = x[c:], y[c:], x[:c], y[:c]
 
     # Train the model.
-    model_keras.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=2, batch_size=128)
-    model_pytorch.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=2, batch_size=128)
+    print('Keras training...')
+    model_keras.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=20, batch_size=128)
+    print('Pytorch training...')
+    model_pytorch.fit(x_train, y_train, validation_data=(x_test, y_test), epochs=20, batch_size=128)
 
     # Save the model for later.
     model_keras.save('n_beats_model.h5')
