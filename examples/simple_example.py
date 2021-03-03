@@ -28,6 +28,7 @@ def main():
     model_pytorch.compile_model(loss='mae', learning_rate=1e-4)
 
     # Definition of the data. The problem to solve is to find f such as | f(x) - y | -> 0.
+    # where f = np.mean.
     x = np.random.uniform(size=(num_samples, time_steps, input_dim))
     y = np.mean(x, axis=1, keepdims=True)
 
