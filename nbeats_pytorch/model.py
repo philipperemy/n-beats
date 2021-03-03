@@ -10,7 +10,7 @@ class NBeatsNet(nn.Module):
     GENERIC_BLOCK = 'generic'
 
     def __init__(self,
-                 device,
+                 device=torch.device('cpu'),
                  stack_types=(TREND_BLOCK, SEASONALITY_BLOCK),
                  nb_blocks_per_stack=3,
                  forecast_length=5,

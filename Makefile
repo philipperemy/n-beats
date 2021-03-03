@@ -3,10 +3,10 @@ all:
 	make install-pytorch
 
 install-keras:
-	export FRAMEWORK="keras" && pip install . --upgrade
+	export FRAMEWORK="keras" && pip install -e . --upgrade
 
 install-pytorch:
-	export FRAMEWORK="pytorch" && pip install . --upgrade
+	export FRAMEWORK="pytorch" && pip install -e . --upgrade
 
 clean:
 	rm -rf *egg-info build dist nbeats_pytorch/__pycache__ __pycache__ nbeats_keras/__pycache__ results .DS_Store .ipynb_checkpoints
