@@ -14,14 +14,12 @@ clean:
 deploy-keras:
 	pip install twine --upgrade
 	make clean
-	rm -rf dist build *egg*
 	export FRAMEWORK="keras" && python setup.py sdist bdist_wheel
 	twine upload dist/*
 
 deploy-pytorch:
 	pip install twine --upgrade
 	make clean
-	rm -rf dist build *egg*
 	export FRAMEWORK="pytorch" && python setup.py sdist bdist_wheel
 	twine upload dist/*
 
