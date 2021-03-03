@@ -1,7 +1,11 @@
+import pickle
+import random
+
 import numpy as np
 import torch
-from torch import nn
+from torch import nn, optim
 from torch.nn import functional as F
+from torch.nn.functional import mse_loss, l1_loss, binary_cross_entropy, cross_entropy
 
 
 class NBeatsNet(nn.Module):
@@ -15,7 +19,7 @@ class NBeatsNet(nn.Module):
                  nb_blocks_per_stack=3,
                  forecast_length=5,
                  backcast_length=10,
-                 thetas_dims=(4, 8),
+                 thetas_dim=(4, 8),
                  share_weights_in_stack=False,
                  hidden_layer_units=256,
                  nb_harmonics=None):
@@ -28,7 +32,7 @@ class NBeatsNet(nn.Module):
         self.nb_harmonics = nb_harmonics
         self.stack_types = stack_types
         self.stacks = []
-        self.thetas_dim = thetas_dims
+        self.thetas_dim = thetas_dim
         self.parameters = []
         self.device = device
         print('| N-Beats')
@@ -36,6 +40,8 @@ class NBeatsNet(nn.Module):
             self.stacks.append(self.create_stack(stack_id))
         self.parameters = nn.ParameterList(self.parameters)
         self.to(self.device)
+        self._loss = None
+        self._opt = None
 
     def create_stack(self, stack_id):
         stack_type = self.stack_types[stack_id]
@@ -53,6 +59,13 @@ class NBeatsNet(nn.Module):
             blocks.append(block)
         return blocks
 
+    def save(self, filename: str):
+        torch.save(self, filename)
+
+    @staticmethod
+    def load(f, map_location=None, pickle_module=pickle, **pickle_load_args):
+        return torch.load(f, map_location, pickle_module, **pickle_load_args)
+
     @staticmethod
     def select_block(block_type):
         if block_type == NBeatsNet.SEASONALITY_BLOCK:
@@ -62,7 +75,72 @@ class NBeatsNet(nn.Module):
         else:
             return GenericBlock
 
+    def compile_model(self, loss: str, learning_rate: float):
+        # TODO: check that.
+        if loss == 'mae':
+            loss_ = l1_loss
+        elif loss == 'mse':
+            loss_ = mse_loss
+        elif loss == 'cross_entropy':
+            loss_ = cross_entropy
+        elif loss == 'binary_crossentropy':
+            loss_ = binary_cross_entropy
+        else:
+            raise ValueError(f'Unknown loss name: {loss}.')
+        # noinspection PyArgumentList
+        self._opt = optim.Adam(lr=learning_rate, params=self.parameters())
+        self._loss = loss_
+
+    def fit(self, x_train, y_train, validation_data=None, epochs=10, batch_size=128):
+
+        def split(arr, size):
+            arrays = []
+            while len(arr) > size:
+                slice_ = arr[:size]
+                arrays.append(slice_)
+                arr = arr[size:]
+            arrays.append(arr)
+            return arrays
+
+        for epoch in range(epochs):
+            x_train_list = split(x_train, batch_size)
+            y_train_list = split(y_train, batch_size)
+            assert len(x_train_list) == len(y_train_list)
+            shuffled_indices = list(range(len(x_train_list)))
+            random.shuffle(shuffled_indices)
+            self.train()
+            train_loss = []
+            for batch_id in shuffled_indices:
+                batch_x, batch_y = x_train_list[batch_id], y_train_list[batch_id]
+                self._opt.zero_grad()
+                _, forecast = self(torch.tensor(batch_x, dtype=torch.float).to(self.device))
+                loss = self._loss(forecast, squeeze_last_dim(torch.tensor(batch_y, dtype=torch.float).to(self.device)))
+                train_loss.append(loss.item())
+                loss.backward()
+                self._opt.step()
+            train_loss = np.mean(train_loss)
+
+            test_loss = '[undefined]'
+            if validation_data is not None:
+                x_test, y_test = validation_data
+                self.eval()
+                _, forecast = self(torch.tensor(x_test, dtype=torch.float).to(self.device))
+                test_loss = self._loss(forecast, squeeze_last_dim(torch.tensor(y_test, dtype=torch.float))).item()
+            print(f'epoch = {epoch}, train_loss = {train_loss:.4f}, test_loss = {test_loss:.4f}.')
+
+    def predict(self, x, return_backcast=False):
+        self.eval()
+        b, f = self(torch.tensor(x, dtype=torch.float).to(self.device))
+        b, f = b.detach().numpy(), f.detach().numpy()
+        if len(x.shape) == 3:
+            b = np.expand_dims(b, axis=-1)
+            f = np.expand_dims(f, axis=-1)
+        if return_backcast:
+            return b, f
+        return f
+
     def forward(self, backcast):
+        backcast = squeeze_last_dim(backcast)
         forecast = torch.zeros(size=(backcast.size()[0], self.forecast_length,))  # maybe batch size here.
         for stack_id in range(len(self.stacks)):
             for block_id in range(len(self.stacks[stack_id])):
@@ -70,6 +148,12 @@ class NBeatsNet(nn.Module):
                 backcast = backcast.to(self.device) - b
                 forecast = forecast.to(self.device) + f
         return backcast, forecast
+
+
+def squeeze_last_dim(tensor):
+    if len(tensor.shape) == 3 and tensor.shape[-1] == 1:  # (128, 10, 1) => (128, 10).
+        return tensor[..., 0]
+    return tensor
 
 
 def seasonality_model(thetas, t, device):
@@ -119,6 +203,7 @@ class Block(nn.Module):
             self.theta_f_fc = nn.Linear(units, thetas_dim, bias=False)
 
     def forward(self, x):
+        x = squeeze_last_dim(x)
         x = F.relu(self.fc1(x.to(self.device)))
         x = F.relu(self.fc2(x))
         x = F.relu(self.fc3(x))

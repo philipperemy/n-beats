@@ -3,10 +3,10 @@ from argparse import ArgumentParser
 
 import matplotlib.pyplot as plt
 import torch
-from data import get_m4_data, dummy_data_generator
 from torch import optim
 from torch.nn import functional as F
 
+from data import get_m4_data, dummy_data_generator
 from nbeats_pytorch.model import NBeatsNet
 
 CHECKPOINT_NAME = 'nbeats-training-checkpoint.th'
@@ -60,7 +60,7 @@ def main():
     net = NBeatsNet(device=device,
                     stack_types=[NBeatsNet.TREND_BLOCK, NBeatsNet.SEASONALITY_BLOCK, NBeatsNet.GENERIC_BLOCK],
                     forecast_length=forecast_length,
-                    thetas_dims=[2, 8, 3],
+                    thetas_dim=[2, 8, 3],
                     nb_blocks_per_stack=3,
                     backcast_length=backcast_length,
                     hidden_layer_units=1024,
@@ -81,7 +81,7 @@ def main():
     simple_fit(net, optimiser, data_gen, plot_model, device, max_grad_steps)
 
 
-def simple_fit(net, optimiser, data_generator, on_save_callback, device, max_grad_steps=10000):
+def simple_fit(net, optimiser, data_generator, on_save_callback=None, device=torch.device('cpu'), max_grad_steps=10000):
     print('--- Training ---')
     initial_grad_step = load(net, optimiser)
     for grad_step, (x, target) in enumerate(data_generator):
@@ -103,7 +103,7 @@ def simple_fit(net, optimiser, data_generator, on_save_callback, device, max_gra
             break
 
 
-def save(model, optimiser, grad_step):
+def save(model, optimiser, grad_step=0):
     torch.save({
         'grad_step': grad_step,
         'model_state_dict': model.state_dict(),

@@ -158,7 +158,7 @@ class NBeatsNet:
 
         return backcast_, forecast_
 
-    def compile_model(self, loss, learning_rate):
+    def compile_model(self, loss: str, learning_rate: float):
         optimizer = Adam(lr=learning_rate)
         self.compile(loss=loss, optimizer=optimizer)
 
