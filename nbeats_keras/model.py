@@ -10,8 +10,8 @@ class NBeatsNet:
     TREND_BLOCK = 'trend'
     SEASONALITY_BLOCK = 'seasonality'
 
-    _BACKCAST = 0
-    _FORECAST = 1
+    _BACKCAST = 'backcast'
+    _FORECAST = 'forecast'
 
     def __init__(self,
                  input_dim=1,
@@ -77,28 +77,14 @@ class NBeatsNet:
             x_ = x_[0]
 
         if self.has_exog():
-            model = Model([x, e], y_, name='forecast')
-            model2 = Model([x, e], x_, name='backcast')
+            n_beats_forecast = Model([x, e], y_, name=self._FORECAST)
+            n_beats_backcast = Model([x, e], x_, name=self._BACKCAST)
         else:
-            model = Model(x, y_, name='forecast')
-            model2 = Model(x, x_, name='backcast')
+            n_beats_forecast = Model(x, y_, name=self._FORECAST)
+            n_beats_backcast = Model(x, x_, name=self._BACKCAST)
 
-        self.n_beats = model
-        # no need to compile it. It's just here if we want to see how the backcast looks like.
-        # the forecast is used in the loss function so it has to be compiled.
-        self.n_beats_backcast = model2
+        self.models = {model.name: model for model in [n_beats_backcast, n_beats_forecast]}
         self.cast_type = self._FORECAST
-
-    def _switch(self, cast_type):
-        if self.cast_type == cast_type:
-            return f'ALREADY_ON_{cast_type}'
-        else:
-            # just swap [n_beats] and [n_beats_backcast] variables.
-            # [n_beats] methods are linked to a Keras object by __getattr__ (defined below).
-            u = self.n_beats
-            self.n_beats = self.n_beats_backcast
-            self.n_beats_backcast = u
-            return f'SWITCHED_TO_{cast_type}'
 
     def has_exog(self):
         # exo/exog is short for 'exogenous variable', i.e. any input
@@ -183,20 +169,17 @@ class NBeatsNet:
         # https://github.com/faif/python-patterns
         # model.predict() instead of model.n_beats.predict()
         # same for fit(), train_on_batch()...
-        attr = getattr(self.n_beats, name)
+        attr = getattr(self.models[self._FORECAST], name)
 
         if not callable(attr):
             return attr
 
         def wrapper(*args, **kwargs):
+            cast_type = self._FORECAST
             if attr.__name__ == 'predict' and 'return_backcast' in kwargs and kwargs['return_backcast']:
-                self._switch(cast_type=self._BACKCAST)
                 del kwargs['return_backcast']
-            try:
-                result = getattr(self.n_beats, attr.__name__)(*args, **kwargs)
-            finally:
-                self._switch(cast_type=self._FORECAST)
-            return result
+                cast_type = self._BACKCAST
+            return getattr(self.models[cast_type], attr.__name__)(*args, **kwargs)
 
         return wrapper
 
