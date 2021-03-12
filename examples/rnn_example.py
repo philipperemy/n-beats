@@ -12,6 +12,7 @@ import numpy as np
 import pandas as pd
 import tensorflow as tf
 from keras.callbacks import Callback
+
 from nbeats_keras.model import NBeatsNet
 
 pd.set_option('display.max_rows', None)
@@ -75,9 +76,6 @@ uni_train_std = uni_data[:TRAIN_SPLIT].std()
 
 uni_data = dn.apply(uni_data)
 
-# plt.plot(uni_data)
-# plt.show()
-
 univariate_past_history = 20
 univariate_future_target = 0
 
@@ -101,16 +99,16 @@ b2_val_uni = x_val_uni[:, -1, 0]
 print(np.mean(np.abs(b2_val_uni - y_val_uni)))
 print(np.mean(np.abs(dn.apply_inv(b2_val_uni) - dn.apply_inv(y_val_uni))))
 
-m = NBeatsNet(stack_types=(NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK),
-              nb_blocks_per_stack=3,
-              forecast_length=1,
-              backcast_length=univariate_past_history,
-              thetas_dim=(15, 15, 15),
-              share_weights_in_stack=False,
-              hidden_layer_units=384)
-m.compile_model(loss='mae', learning_rate=1e-4)
-print('compile_model()')
-print('fit()')
+# noinspection PyArgumentEqualDefault
+m = NBeatsNet(
+    stack_types=(NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK, NBeatsNet.GENERIC_BLOCK),
+    nb_blocks_per_stack=3,
+    forecast_length=1,
+    backcast_length=univariate_past_history,
+    thetas_dim=(15, 15, 15),
+    share_weights_in_stack=False,
+    hidden_layer_units=384)
+m.compile(loss='mae', optimizer='adam')
 
 
 class EvaluateModelCallback(Callback):

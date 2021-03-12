@@ -3,13 +3,15 @@ from keras import backend as K
 from keras.layers import Concatenate
 from keras.layers import Input, Dense, Lambda, Subtract, Add, Reshape
 from keras.models import Model
-from keras.optimizers import Adam
 
 
 class NBeatsNet:
     GENERIC_BLOCK = 'generic'
     TREND_BLOCK = 'trend'
     SEASONALITY_BLOCK = 'seasonality'
+
+    _BACKCAST = 'backcast'
+    _FORECAST = 'forecast'
 
     def __init__(self,
                  input_dim=1,
@@ -66,21 +68,27 @@ class NBeatsNet:
 
         for k in range(self.input_dim):
             y_[k] = Reshape(target_shape=(self.forecast_length, 1))(y_[k])
+            x_[k] = Reshape(target_shape=(self.backcast_length, 1))(x_[k])
         if self.input_dim > 1:
-            y_ = Concatenate(axis=-1)([y_[ll] for ll in range(self.input_dim)])
+            y_ = Concatenate()([y_[ll] for ll in range(self.input_dim)])
+            x_ = Concatenate()([x_[ll] for ll in range(self.input_dim)])
         else:
             y_ = y_[0]
+            x_ = x_[0]
 
         if self.has_exog():
-            model = Model([x, e], y_)
+            n_beats_forecast = Model([x, e], y_, name=self._FORECAST)
+            n_beats_backcast = Model([x, e], x_, name=self._BACKCAST)
         else:
-            model = Model(x, y_)
+            n_beats_forecast = Model(x, y_, name=self._FORECAST)
+            n_beats_backcast = Model(x, x_, name=self._BACKCAST)
 
-        self.n_beats = model
+        self.models = {model.name: model for model in [n_beats_backcast, n_beats_forecast]}
+        self.cast_type = self._FORECAST
 
     def has_exog(self):
         # exo/exog is short for 'exogenous variable', i.e. any input
-        # features other than the target timeseries itself.
+        # features other than the target time-series itself.
         return self.exo_dim > 0
 
     @staticmethod
@@ -104,7 +112,6 @@ class NBeatsNet:
         return layer_with_weights
 
     def create_block(self, x, e, stack_id, block_id, stack_type, nb_poly):
-
         # register weights (useful when share_weights_in_stack=True)
         def reg(layer):
             return self._r(layer, stack_id)
@@ -158,21 +165,21 @@ class NBeatsNet:
 
         return backcast_, forecast_
 
-    def compile_model(self, loss: str, learning_rate: float):
-        optimizer = Adam(lr=learning_rate)
-        self.compile(loss=loss, optimizer=optimizer)
-
     def __getattr__(self, name):
         # https://github.com/faif/python-patterns
         # model.predict() instead of model.n_beats.predict()
         # same for fit(), train_on_batch()...
-        attr = getattr(self.n_beats, name)
+        attr = getattr(self.models[self._FORECAST], name)
 
         if not callable(attr):
             return attr
 
         def wrapper(*args, **kwargs):
-            return attr(*args, **kwargs)
+            cast_type = self._FORECAST
+            if attr.__name__ == 'predict' and 'return_backcast' in kwargs and kwargs['return_backcast']:
+                del kwargs['return_backcast']
+                cast_type = self._BACKCAST
+            return getattr(self.models[cast_type], attr.__name__)(*args, **kwargs)
 
         return wrapper
 

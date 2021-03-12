@@ -164,7 +164,7 @@ def main():
     else:
         raise ValueError('Unknown task.')
 
-    model.compile_model(loss='mae', learning_rate=1e-5)
+    model.compile(loss='mae', optimizer='adam')
     train_model(model, args.task, is_test=args.test)
 
 
