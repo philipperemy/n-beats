@@ -1,12 +1,14 @@
 import pickle
 import random
 from time import time
+from typing import Union
 
 import numpy as np
 import torch
 from torch import nn, optim
 from torch.nn import functional as F
 from torch.nn.functional import mse_loss, l1_loss, binary_cross_entropy, cross_entropy
+from torch.optim import Optimizer
 
 
 class NBeatsNet(nn.Module):
@@ -76,8 +78,7 @@ class NBeatsNet(nn.Module):
         else:
             return GenericBlock
 
-    def compile_model(self, loss: str, learning_rate: float):
-        # TODO: check that.
+    def compile(self, loss: str, optimizer: Union[str, Optimizer]):
         if loss == 'mae':
             loss_ = l1_loss
         elif loss == 'mse':
@@ -89,7 +90,19 @@ class NBeatsNet(nn.Module):
         else:
             raise ValueError(f'Unknown loss name: {loss}.')
         # noinspection PyArgumentList
-        self._opt = optim.Adam(lr=learning_rate, params=self.parameters())
+        if isinstance(optimizer, str):
+            if optimizer == 'adam':
+                opt_ = optim.Adam
+            elif optimizer == 'sgd':
+                opt_ = optim.SGD
+            elif optimizer == 'rmsprop':
+                opt_ = optim.RMSprop
+            else:
+                raise ValueError(f'Unknown opt name: {optimizer}.')
+            opt_ = opt_(lr=1e-4, params=self.parameters())
+        else:
+            opt_ = optimizer
+        self._opt = opt_
         self._loss = loss_
 
     def fit(self, x_train, y_train, validation_data=None, epochs=10, batch_size=32):
@@ -145,7 +158,7 @@ class NBeatsNet(nn.Module):
             b = np.expand_dims(b, axis=-1)
             f = np.expand_dims(f, axis=-1)
         if return_backcast:
-            return b, f
+            return b
         return f
 
     def forward(self, backcast):

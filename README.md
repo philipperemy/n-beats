@@ -63,8 +63,8 @@ def main():
                                   hidden_layer_units=64)
 
     # Definition of the objective function and the optimizer.
-    model_keras.compile_model(loss='mae', learning_rate=1e-4)
-    model_pytorch.compile_model(loss='mae', learning_rate=1e-4)
+    model_keras.compile(loss='mae', optimizer='adam')
+    model_pytorch.compile(loss='mae', optimizer='adam')
 
     # Definition of the data. The problem to solve is to find f such as | f(x) - y | -> 0.
     # where f = np.mean.
@@ -74,6 +74,7 @@ def main():
     # Split data into training and testing datasets.
     c = num_samples // 10
     x_train, y_train, x_test, y_test = x[c:], y[c:], x[:c], y[:c]
+    test_size = len(x_test)
 
     # Train the model.
     print('Keras training...')
@@ -85,18 +86,24 @@ def main():
     model_keras.save('n_beats_model.h5')
     model_pytorch.save('n_beats_pytorch.th')
 
-    # Predict on the testing set.
-    predictions_keras = model_keras.predict(x_test)
-    predictions_pytorch = model_pytorch.predict(x_test)
-    print(predictions_keras.shape)
-    print(predictions_pytorch.shape)
+    # Predict on the testing set (forecast).
+    predictions_keras_forecast = model_keras.predict(x_test)
+    predictions_pytorch_forecast = model_pytorch.predict(x_test)
+    np.testing.assert_equal(predictions_keras_forecast.shape, (test_size, model_keras.forecast_length, output_dim))
+    np.testing.assert_equal(predictions_pytorch_forecast.shape, (test_size, model_pytorch.forecast_length, output_dim))
+
+    # Predict on the testing set (backcast).
+    predictions_keras_backcast = model_keras.predict(x_test, return_backcast=True)
+    predictions_pytorch_backcast = model_pytorch.predict(x_test, return_backcast=True)
+    np.testing.assert_equal(predictions_keras_backcast.shape, (test_size, model_keras.backcast_length, output_dim))
+    np.testing.assert_equal(predictions_pytorch_backcast.shape, (test_size, model_pytorch.backcast_length, output_dim))
 
     # Load the model.
     model_keras_2 = NBeatsKeras.load('n_beats_model.h5')
     model_pytorch_2 = NBeatsPytorch.load('n_beats_pytorch.th')
 
-    np.testing.assert_almost_equal(predictions_keras, model_keras_2.predict(x_test))
-    np.testing.assert_almost_equal(predictions_pytorch, model_pytorch_2.predict(x_test))
+    np.testing.assert_almost_equal(predictions_keras_forecast, model_keras_2.predict(x_test))
+    np.testing.assert_almost_equal(predictions_pytorch_forecast, model_pytorch_2.predict(x_test))
 
 
 if __name__ == '__main__':

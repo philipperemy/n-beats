@@ -3,13 +3,15 @@ from keras import backend as K
 from keras.layers import Concatenate
 from keras.layers import Input, Dense, Lambda, Subtract, Add, Reshape
 from keras.models import Model
-from keras.optimizers import Adam
 
 
 class NBeatsNet:
     GENERIC_BLOCK = 'generic'
     TREND_BLOCK = 'trend'
     SEASONALITY_BLOCK = 'seasonality'
+
+    _BACKCAST = 0
+    _FORECAST = 1
 
     def __init__(self,
                  input_dim=1,
@@ -66,21 +68,41 @@ class NBeatsNet:
 
         for k in range(self.input_dim):
             y_[k] = Reshape(target_shape=(self.forecast_length, 1))(y_[k])
+            x_[k] = Reshape(target_shape=(self.backcast_length, 1))(x_[k])
         if self.input_dim > 1:
-            y_ = Concatenate(axis=-1)([y_[ll] for ll in range(self.input_dim)])
+            y_ = Concatenate()([y_[ll] for ll in range(self.input_dim)])
+            x_ = Concatenate()([x_[ll] for ll in range(self.input_dim)])
         else:
             y_ = y_[0]
+            x_ = x_[0]
 
         if self.has_exog():
-            model = Model([x, e], y_)
+            model = Model([x, e], y_, name='forecast')
+            model2 = Model([x, e], x_, name='backcast')
         else:
-            model = Model(x, y_)
+            model = Model(x, y_, name='forecast')
+            model2 = Model(x, x_, name='backcast')
 
         self.n_beats = model
+        # no need to compile it. It's just here if we want to see how the backcast looks like.
+        # the forecast is used in the loss function so it has to be compiled.
+        self.n_beats_backcast = model2
+        self.cast_type = self._FORECAST
+
+    def _switch(self, cast_type):
+        if self.cast_type == cast_type:
+            return f'ALREADY_ON_{cast_type}'
+        else:
+            # just swap [n_beats] and [n_beats_backcast] variables.
+            # [n_beats] methods are linked to a Keras object by __getattr__ (defined below).
+            u = self.n_beats
+            self.n_beats = self.n_beats_backcast
+            self.n_beats_backcast = u
+            return f'SWITCHED_TO_{cast_type}'
 
     def has_exog(self):
         # exo/exog is short for 'exogenous variable', i.e. any input
-        # features other than the target timeseries itself.
+        # features other than the target time-series itself.
         return self.exo_dim > 0
 
     @staticmethod
@@ -104,7 +126,6 @@ class NBeatsNet:
         return layer_with_weights
 
     def create_block(self, x, e, stack_id, block_id, stack_type, nb_poly):
-
         # register weights (useful when share_weights_in_stack=True)
         def reg(layer):
             return self._r(layer, stack_id)
@@ -158,10 +179,6 @@ class NBeatsNet:
 
         return backcast_, forecast_
 
-    def compile_model(self, loss: str, learning_rate: float):
-        optimizer = Adam(lr=learning_rate)
-        self.compile(loss=loss, optimizer=optimizer)
-
     def __getattr__(self, name):
         # https://github.com/faif/python-patterns
         # model.predict() instead of model.n_beats.predict()
@@ -172,7 +189,14 @@ class NBeatsNet:
             return attr
 
         def wrapper(*args, **kwargs):
-            return attr(*args, **kwargs)
+            if attr.__name__ == 'predict' and 'return_backcast' in kwargs and kwargs['return_backcast']:
+                self._switch(cast_type=self._BACKCAST)
+                del kwargs['return_backcast']
+            try:
+                result = getattr(self.n_beats, attr.__name__)(*args, **kwargs)
+            finally:
+                self._switch(cast_type=self._FORECAST)
+            return result
 
         return wrapper
 
