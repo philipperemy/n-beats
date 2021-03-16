@@ -1,4 +1,4 @@
-# N-BEATS: Neural basis expansion analysis for interpretable time series forecasting
+# N-BEATS: Neural basis expansion analysis for interpretable time series forecasting (Keras, Pytorch)
 - https://arxiv.org/abs/1905.10437
 - By Philippe Remy and Jean-Sébastien Dhr
 
