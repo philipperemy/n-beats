@@ -10,6 +10,8 @@ Trust me, after a few more steps, the green curve (predictions) matches the grou
 
 ## Installation
 
+Make sure you are in a virtualenv (recommended) and have python3 installed.
+
 ### From PyPI
 
 Install Keras: `pip install nbeats-keras`.
@@ -18,7 +20,7 @@ Install Pytorch: `pip install nbeats-pytorch`.
 
 ### From the sources
 
-Installation is based on a MakeFile. Make sure you are in a virtualenv and have python3 installed.
+Installation is based on a MakeFile.
 
 Command to install N-Beats with Keras: `make install-keras`
 
