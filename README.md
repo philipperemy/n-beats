@@ -34,7 +34,9 @@ To force the utilization of the GPU (Tensorflow), run: `pip uninstall -y tensorf
 
 Jupyter notebook: [NBeats.ipynb](examples/NBeats.ipynb): `make run-jupyter`.
 
-Here is a toy example on how to use this model (train/inference) for the Keras and Pytorch backends:
+Here is a toy example on how to use this model (train/inference) for the Keras and Pytorch backends.
+
+Note that only the Keras backend supports `input_dim>1` (at the moment).
 
 ```python
 import warnings
