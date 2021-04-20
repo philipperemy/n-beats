@@ -51,6 +51,7 @@ warnings.filterwarnings(action='ignore', message='Setting attributes')
 
 def main():
     # https://keras.io/layers/recurrent/
+    # At the moment only Keras supports input_dim > 1. In the original paper, input_dim=1.
     num_samples, time_steps, input_dim, output_dim = 50_000, 10, 1, 1
 
     for BackendType in [NBeatsKeras, NBeatsPytorch]:
