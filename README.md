@@ -54,6 +54,7 @@ def main():
     # At the moment only Keras supports input_dim > 1. In the original paper, input_dim=1.
     num_samples, time_steps, input_dim, output_dim = 50_000, 10, 1, 1
 
+    # This example is for both Keras and Pytorch. In practice, choose the one you prefer.
     for BackendType in [NBeatsKeras, NBeatsPytorch]:
         backend = BackendType(
             backcast_length=time_steps, forecast_length=output_dim,
