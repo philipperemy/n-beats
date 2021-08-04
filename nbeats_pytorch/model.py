@@ -281,8 +281,8 @@ class GenericBlock(Block):
         # no constraint for generic arch.
         x = super(GenericBlock, self).forward(x)
 
-        theta_b = F.relu(self.theta_b_fc(x))
-        theta_f = F.relu(self.theta_f_fc(x))
+        theta_b = self.theta_b_fc(x)
+        theta_f = self.theta_f_fc(x)
 
         backcast = self.backcast_fc(theta_b)  # generic. 3.3.
         forecast = self.forecast_fc(theta_f)  # generic. 3.3.
