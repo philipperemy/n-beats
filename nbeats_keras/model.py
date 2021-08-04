@@ -186,7 +186,7 @@ class NBeatsNet:
 
 def linear_space(backcast_length, forecast_length, is_forecast=True):
     ls = K.arange(-float(backcast_length), float(forecast_length), 1) / forecast_length
-    return ls[backcast_length:] if is_forecast else ls[:backcast_length]
+    return ls[backcast_length:] if is_forecast else K.abs(K.reverse(ls[:backcast_length], axes=0))
 
 
 def seasonality_model(thetas, backcast_length, forecast_length, is_forecast):

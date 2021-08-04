@@ -197,7 +197,7 @@ def trend_model(thetas, t, device):
 
 def linear_space(backcast_length, forecast_length):
     ls = np.arange(-backcast_length, forecast_length, 1) / forecast_length
-    b_ls = ls[:backcast_length]
+    b_ls = np.abs(np.flip(ls[:backcast_length]))
     f_ls = ls[backcast_length:]
     return b_ls, f_ls
 
