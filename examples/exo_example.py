@@ -1,13 +1,13 @@
 import warnings
 
 import numpy as np
-from keras.utils.vis_utils import plot_model
 
 from nbeats_keras.model import NBeatsNet as NBeatsKeras
 
 warnings.filterwarnings(action='ignore', message='Setting attributes')
 
 
+# As of today, exogenous variables have only been implemented in the Keras backend.
 def main():
     # Let's consider a setup where we have [sunshine] and [rainfall] and we want to predict [rainfall].
     # [sunshine] will be our external variable (endogenous).
@@ -33,7 +33,8 @@ def main():
         exo_dim=exo_dim
     )
 
-    plot_model(model_keras, 'ds.png')
+    # from keras.utils.vis_utils import plot_model
+    # plot_model(model_keras, 'exo.png')
 
     model_keras.compile(loss='mae', optimizer='adam')
     rainfall = np.random.uniform(size=(num_samples, time_steps + 1, input_dim))
