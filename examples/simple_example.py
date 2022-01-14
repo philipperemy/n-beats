@@ -13,7 +13,7 @@ def main():
     num_samples, time_steps, input_dim, output_dim = 50_000, 10, 1, 1
 
     # Definition of the model.
-    # NOTE: If you choose the Keras backend with input_dim>1, you have 
+    # NOTE: If you choose the Keras backend with input_dim>1, you have
     # to set the value here too (in the constructor).
     model_keras = NBeatsKeras(backcast_length=time_steps, forecast_length=output_dim,
                               stack_types=(NBeatsKeras.GENERIC_BLOCK, NBeatsKeras.GENERIC_BLOCK),

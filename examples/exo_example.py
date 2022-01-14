@@ -20,7 +20,7 @@ def main():
     num_samples, time_steps, input_dim, output_dim, exo_dim = 1000, 20, 1, 1, 1
 
     # Definition of the model.
-    # NOTE: If you choose the Keras backend with input_dim>1, you have 
+    # NOTE: If you choose the Keras backend with input_dim>1, you have
     # to set the value here too (in the constructor).
     model_keras = NBeatsKeras(
         input_dim=input_dim,
