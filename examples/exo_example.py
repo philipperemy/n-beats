@@ -1,10 +1,6 @@
-import warnings
-
 import numpy as np
 
 from nbeats_keras.model import NBeatsNet as NBeatsKeras
-
-warnings.filterwarnings(action='ignore', message='Setting attributes')
 
 
 # As of today, exogenous variables have only been implemented in the Keras backend.
