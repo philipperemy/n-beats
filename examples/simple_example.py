@@ -10,17 +10,17 @@ warnings.filterwarnings(action='ignore', message='Setting attributes')
 
 def main():
     # https://keras.io/layers/recurrent/
-    num_samples, time_steps, input_dim, output_dim = 50_000, 10, 1, 1
+    num_samples, time_steps, input_dim, output_steps = 50_000, 10, 1, 1
 
     # Definition of the model.
     # NOTE: If you choose the Keras backend with input_dim>1, you have
     # to set the value here too (in the constructor).
-    model_keras = NBeatsKeras(backcast_length=time_steps, forecast_length=output_dim,
+    model_keras = NBeatsKeras(backcast_length=time_steps, forecast_length=output_steps,
                               stack_types=(NBeatsKeras.GENERIC_BLOCK, NBeatsKeras.GENERIC_BLOCK),
                               nb_blocks_per_stack=2, thetas_dim=(4, 4), share_weights_in_stack=True,
                               hidden_layer_units=64)
 
-    model_pytorch = NBeatsPytorch(backcast_length=time_steps, forecast_length=output_dim,
+    model_pytorch = NBeatsPytorch(backcast_length=time_steps, forecast_length=output_steps,
                                   stack_types=(NBeatsPytorch.GENERIC_BLOCK, NBeatsPytorch.GENERIC_BLOCK),
                                   nb_blocks_per_stack=2, thetas_dim=(4, 4), share_weights_in_stack=True,
                                   hidden_layer_units=64)
@@ -52,14 +52,16 @@ def main():
     # Predict on the testing set (forecast).
     predictions_keras_forecast = model_keras.predict(x_test)
     predictions_pytorch_forecast = model_pytorch.predict(x_test)
-    np.testing.assert_equal(predictions_keras_forecast.shape, (test_size, model_keras.forecast_length, output_dim))
-    np.testing.assert_equal(predictions_pytorch_forecast.shape, (test_size, model_pytorch.forecast_length, output_dim))
+    np.testing.assert_equal(predictions_keras_forecast.shape, (test_size, model_keras.forecast_length, output_steps))
+    np.testing.assert_equal(predictions_pytorch_forecast.shape,
+                            (test_size, model_pytorch.forecast_length, output_steps))
 
     # Predict on the testing set (backcast).
     predictions_keras_backcast = model_keras.predict(x_test, return_backcast=True)
     predictions_pytorch_backcast = model_pytorch.predict(x_test, return_backcast=True)
-    np.testing.assert_equal(predictions_keras_backcast.shape, (test_size, model_keras.backcast_length, output_dim))
-    np.testing.assert_equal(predictions_pytorch_backcast.shape, (test_size, model_pytorch.backcast_length, output_dim))
+    np.testing.assert_equal(predictions_keras_backcast.shape, (test_size, model_keras.backcast_length, output_steps))
+    np.testing.assert_equal(predictions_pytorch_backcast.shape,
+                            (test_size, model_pytorch.backcast_length, output_steps))
 
     # Load the model.
     model_keras_2 = NBeatsKeras.load('n_beats_model.h5')
