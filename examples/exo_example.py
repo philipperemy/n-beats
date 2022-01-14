@@ -20,7 +20,7 @@ def main():
     num_samples, time_steps, input_dim, output_dim, exo_dim = 1000, 20, 1, 1, 1
 
     # Definition of the model.
-    # NOTE: If you choose the Keras backend with input_dim>1, you have 
+    # NOTE: If you choose the Keras backend with input_dim>1, you have
     # to set the value here too (in the constructor).
     model_keras = NBeatsKeras(
         input_dim=input_dim,
@@ -44,6 +44,8 @@ def main():
 
     model_keras.compile(loss='mae', optimizer='adam')
     model_keras.fit([x_rainfall, x_sunshine], y_rainfall, epochs=10)
+
+    np.testing.assert_equal(model_keras.predict([x_rainfall, x_sunshine]).shape, (1000, 1, 1))
 
 
 if __name__ == '__main__':
