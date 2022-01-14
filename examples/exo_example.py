@@ -9,9 +9,9 @@ def main():
     # [sunshine] will be our external variable (endogenous).
     # [rainfall] will be our internal variable (endogenous).
     # We assume that rainfall[t] depends on the previous values of rainfall[t-1], ... rainfall[t-N].
-    # And we also think that rainfall[t] depends on sunshine[t-1].
-    # Rainfall is 1-D so input_dim=1.
-    # Output_dim is also 1-D. It's rainfall[t]. output_dim=1.
+    # And we also think that rainfall[t] depends on sunshine.
+    # Rainfall is 1-D so input_dim=1. We have just one exo variable so exo_dim=1.
+    # Output_dim is also 1-D. It's rainfall[t]. Therefore, output_dim=1.
     # We have long sequences of rainfall[t], sunshine[t] (t>0) that we cut into length N+1.
     # N will be the history. and +1 is the one we want to predict.
     # N-Beats is not like an LSTM. It needs the history window to be finite (of size N<inf).
