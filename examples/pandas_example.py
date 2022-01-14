@@ -6,16 +6,14 @@ from nbeats_keras.model import NBeatsNet as NBeatsKeras
 
 
 # This is an example linked to this issue: https://github.com/philipperemy/n-beats/issues/60.
-# We deviate a bit from the original thoughts of NBeats.
-# Here we:
-# - drop the time dimension.
-# - the target variable is no longer part of the inputs.
-
-# NOTE: it is also possible to solve this problem with exogenous variables. See example/exo_example.py.
+# Here the target variable is no longer part of the inputs.
+# NOTE: it is also possible to solve this problem with exogenous variables.
+# See example/exo_example.py.
 
 def main():
-    num_rows = 1000
+    num_rows = 100
     num_columns = 4
+    timesteps = 20
     d = pd.DataFrame(data=np.random.uniform(size=(num_rows, num_columns)), columns=['A', 'B', 'C', 'D'])
     print(d.head())
 
@@ -23,27 +21,28 @@ def main():
     predictors = d[['A', 'B', 'C']]
     targets = d['D']
 
-    predictors = np.expand_dims(predictors, axis=1)  # "emulate" the time dimension
-    targets = np.expand_dims(targets, axis=1)  # "emulate" the time dimension
-
-    num_samples, time_steps, input_dim, output_dim = num_rows, 1, num_columns - 1, 1
+    predictors = np.array([predictors[i:i + timesteps] for i in range(num_rows - timesteps)])
+    targets = np.array([targets[i:i + timesteps] for i in range(num_rows - timesteps)])[:, :, None]
 
     model_keras = NBeatsKeras(
-        input_dim=input_dim,
-        output_dim=output_dim,
+        input_dim=num_columns - 1,
+        output_dim=1,
+        forecast_length=1,
         stack_types=(NBeatsKeras.GENERIC_BLOCK,),
         nb_blocks_per_stack=1,
         thetas_dim=(4,),
-        backcast_length=time_steps
+        backcast_length=timesteps
     )
     plot_model(model_keras, 'pandas.png', show_shapes=True, show_dtype=True)
     model_keras.compile(loss='mae', optimizer='adam')
 
     model_keras.fit(predictors, targets, validation_split=0.2)
 
+    num_predictions = len(predictors)
     predictions = model_keras.predict(predictors)
-    np.testing.assert_equal(predictions.shape, (num_samples, 1, 1))
-    d['P'] = model_keras.predict(predictors).squeeze(axis=(1, 2))
+    np.testing.assert_equal(predictions.shape, (num_predictions, 1, 1))
+    d['P'] = [0] * (num_rows - num_predictions) + list(model_keras.predict(predictors).squeeze(axis=(1, 2)))
+    print(d)
 
 
 if __name__ == '__main__':
