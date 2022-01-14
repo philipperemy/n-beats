@@ -64,6 +64,8 @@ def main():
 
     # This example is for both Keras and Pytorch. In practice, choose the one you prefer.
     for BackendType in [NBeatsKeras, NBeatsPytorch]:
+        # NOTE: If you choose the Keras backend with input_dim>1, you have 
+        # to set the value here too (in the constructor).
         backend = BackendType(
             backcast_length=time_steps, forecast_length=output_dim,
             stack_types=(NBeatsKeras.GENERIC_BLOCK, NBeatsKeras.GENERIC_BLOCK),
