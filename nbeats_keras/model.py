@@ -15,9 +15,10 @@ class NBeatsNet:
 
     def __init__(self,
                  input_dim=1,
+                 output_dim=1,
                  exo_dim=0,
                  backcast_length=10,
-                 forecast_length=2,
+                 forecast_length=1,
                  stack_types=(TREND_BLOCK, SEASONALITY_BLOCK),
                  nb_blocks_per_stack=3,
                  thetas_dim=(4, 8),
@@ -33,10 +34,11 @@ class NBeatsNet:
         self.backcast_length = backcast_length
         self.forecast_length = forecast_length
         self.input_dim = input_dim
+        self.output_dim = output_dim
         self.exo_dim = exo_dim
         self.input_shape = (self.backcast_length, self.input_dim)
         self.exo_shape = (self.backcast_length, self.exo_dim)
-        self.output_shape = (self.forecast_length, self.input_dim)
+        self.output_shape = (self.forecast_length, self.output_dim)
         self.weights = {}
         self.nb_harmonics = nb_harmonics
         assert len(self.stack_types) == len(self.thetas_dim)
@@ -76,12 +78,13 @@ class NBeatsNet:
             y_ = y_[0]
             x_ = x_[0]
 
-        if self.has_exog():
-            n_beats_forecast = Model([x, e], y_, name=self._FORECAST)
-            n_beats_backcast = Model([x, e], x_, name=self._BACKCAST)
-        else:
-            n_beats_forecast = Model(x, y_, name=self._FORECAST)
-            n_beats_backcast = Model(x, x_, name=self._BACKCAST)
+        if self.input_dim != self.output_dim:
+            y_ = Dense(self.output_dim, activation='linear', name='reg_y')(y_)
+            x_ = Dense(self.output_dim, activation='linear', name='reg_x')(x_)
+
+        inputs_x = [x, e] if self.has_exog() else x
+        n_beats_forecast = Model(inputs_x, y_, name=self._FORECAST)
+        n_beats_backcast = Model(inputs_x, x_, name=self._BACKCAST)
 
         self.models = {model.name: model for model in [n_beats_backcast, n_beats_forecast]}
         self.cast_type = self._FORECAST

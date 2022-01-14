@@ -45,6 +45,8 @@ def main():
     model_keras.compile(loss='mae', optimizer='adam')
     model_keras.fit([x_rainfall, x_sunshine], y_rainfall, epochs=10)
 
+    np.testing.assert_equal(model_keras.predict([x_rainfall, x_sunshine]).shape, (1000, 1, 1))
+
 
 if __name__ == '__main__':
     main()
