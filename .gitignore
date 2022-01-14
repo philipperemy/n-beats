@@ -6,3 +6,5 @@ venv
 .DS_Store
 *.png
 results/
+*egg-info*
+.tox
