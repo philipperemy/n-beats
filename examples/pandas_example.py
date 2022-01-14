@@ -1,6 +1,5 @@
 import numpy as np
 import pandas as pd
-from keras.utils.vis_utils import plot_model
 
 from nbeats_keras.model import NBeatsNet as NBeatsKeras
 
@@ -21,19 +20,20 @@ def main():
     predictors = d[['A', 'B', 'C']]
     targets = d['D']
 
+    # backcast length is timesteps.
+    # forecast length is 1.
     predictors = np.array([predictors[i:i + timesteps] for i in range(num_rows - timesteps)])
-    targets = np.array([targets[i:i + timesteps] for i in range(num_rows - timesteps)])[:, :, None]
+    targets = np.array([targets[i:i + 1] for i in range(num_rows - timesteps)])[:, :, None]
 
+    # noinspection PyArgumentEqualDefault
     model_keras = NBeatsKeras(
         input_dim=num_columns - 1,
         output_dim=1,
         forecast_length=1,
-        stack_types=(NBeatsKeras.GENERIC_BLOCK,),
         nb_blocks_per_stack=1,
-        thetas_dim=(4,),
         backcast_length=timesteps
     )
-    plot_model(model_keras, 'pandas.png', show_shapes=True, show_dtype=True)
+    # plot_model(model_keras, 'pandas.png', show_shapes=True, show_dtype=True)
     model_keras.compile(loss='mae', optimizer='adam')
 
     model_keras.fit(predictors, targets, validation_split=0.2)
@@ -41,7 +41,7 @@ def main():
     num_predictions = len(predictors)
     predictions = model_keras.predict(predictors)
     np.testing.assert_equal(predictions.shape, (num_predictions, 1, 1))
-    d['P'] = [0] * (num_rows - num_predictions) + list(model_keras.predict(predictors).squeeze(axis=(1, 2)))
+    d['P'] = [np.nan] * (num_rows - num_predictions) + list(model_keras.predict(predictors).squeeze(axis=(1, 2)))
     print(d)
 
 
