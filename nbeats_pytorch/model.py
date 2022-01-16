@@ -195,7 +195,7 @@ def trend_model(thetas, t, device):
     return thetas.mm(T.to(device))
 
 
-def linear_space(backcast_length, forecast_length, is_forecast):
+def linear_space(backcast_length, forecast_length, is_forecast=True):
     horizon = forecast_length if is_forecast else backcast_length
     return np.arange(0, horizon) / horizon
 
