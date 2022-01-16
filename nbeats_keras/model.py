@@ -1,8 +1,26 @@
 import numpy as np
+import tensorflow as tf
+# noinspection PyUnresolvedReferences
+import tensorflow.experimental.numpy as tnp
 from tensorflow.keras import backend as K
 from tensorflow.keras.layers import Concatenate
 from tensorflow.keras.layers import Input, Dense, Lambda, Subtract, Add, Reshape
 from tensorflow.keras.models import Model
+
+
+def smape_loss(y_true, y_pred):
+    """
+    sMAPE loss as defined in "Appendix A" of
+    http://www.forecastingprinciples.com/files/pdf/Makridakia-The%20M3%20Competition.pdf
+    :return: Loss value
+    """
+    # mask=tf.where(y_true,1.,0.)
+    mask = tf.cast(y_true, tf.bool)
+    mask = tf.cast(mask, tf.float32)
+    sym_sum = tf.abs(y_true) + tf.abs(y_pred)
+    condition = tf.cast(sym_sum, tf.bool)
+    weights = tf.where(condition, 1. / (sym_sum + 1e-8), 0.0)
+    return 200 * tnp.nanmean(tf.abs(y_pred - y_true) * weights * mask)
 
 
 class NBeatsNet:
@@ -188,8 +206,10 @@ class NBeatsNet:
 
 
 def linear_space(backcast_length, forecast_length, is_forecast=True):
-    ls = K.arange(-float(backcast_length), float(forecast_length), 1) / forecast_length
-    return ls[backcast_length:] if is_forecast else K.abs(K.reverse(ls[:backcast_length], axes=0))
+    # ls = K.arange(-float(backcast_length), float(forecast_length), 1) / forecast_length
+    # return ls[backcast_length:] if is_forecast else K.abs(K.reverse(ls[:backcast_length], axes=0))
+    horizon = forecast_length if is_forecast else backcast_length
+    return K.arange(0, horizon) / horizon
 
 
 def seasonality_model(thetas, backcast_length, forecast_length, is_forecast):

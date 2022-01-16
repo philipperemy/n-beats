@@ -195,11 +195,9 @@ def trend_model(thetas, t, device):
     return thetas.mm(T.to(device))
 
 
-def linear_space(backcast_length, forecast_length):
-    ls = np.arange(-backcast_length, forecast_length, 1) / forecast_length
-    b_ls = np.abs(np.flip(ls[:backcast_length]))
-    f_ls = ls[backcast_length:]
-    return b_ls, f_ls
+def linear_space(backcast_length, forecast_length, is_forecast=True):
+    horizon = forecast_length if is_forecast else backcast_length
+    return np.arange(0, horizon) / horizon
 
 
 class Block(nn.Module):
@@ -217,7 +215,8 @@ class Block(nn.Module):
         self.fc3 = nn.Linear(units, units)
         self.fc4 = nn.Linear(units, units)
         self.device = device
-        self.backcast_linspace, self.forecast_linspace = linear_space(backcast_length, forecast_length)
+        self.backcast_linspace = linear_space(backcast_length, forecast_length, is_forecast=False)
+        self.forecast_linspace = linear_space(backcast_length, forecast_length, is_forecast=True)
         if share_thetas:
             self.theta_f_fc = self.theta_b_fc = nn.Linear(units, thetas_dim, bias=False)
         else:
