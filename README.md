@@ -5,7 +5,7 @@ Authors: Philippe Remy and Jean-Sebastien Dhr.
 
 ![Keras TCN CI](https://github.com/philipperemy/n-beats/workflows/N%20Beats%20CI/badge.svg?branch=master)
 
- */* | *Tensorflow (2.3, 2.4, 2.5, 2.6)* | *Pytorch* |
+ */* | *Tensorflow (2.6, 2.7, 2.8)* | *Pytorch* |
  | :--- | :--- | :--- |
 Downloads          | [![NBEATS - Keras - Downloads](https://pepy.tech/badge/nbeats-keras)](https://pepy.tech/project/nbeats-keras) | [![NBEATS - PyTorch - Downloads](https://pepy.tech/badge/nbeats-pytorch)](https://pepy.tech/project/nbeats-pytorch) |
 
