@@ -13,7 +13,7 @@ Downloads          | [![NBEATS - Keras - Downloads](https://pepy.tech/badge/nbea
 
 <p align="center">
   <img src="nbeats.png" width="600"><br/>
-  <i>N-Beats at the beginning of the training</i><br><br>
+  <i>N-Beats in action!</i><br><br>
 </p>
 
 Trust me, after a few more steps, the green curve (predictions) matches the ground truth exactly :-)
