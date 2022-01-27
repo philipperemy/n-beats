@@ -1,13 +1,12 @@
-# N-BEATS: Neural basis expansion analysis for interpretable time series forecasting (Keras, Pytorch)
-Link to [[paper](https://arxiv.org/abs/1905.10437)]. Reproduction of the [[results]](https://github.com/fecet/NBeats-M4).
+## N-BEATS: Neural basis expansion analysis for interpretable time series forecasting
+Unofficial Keras/Pytorch implementation | [Paper](https://arxiv.org/abs/1905.10437) | [Results](https://github.com/fecet/NBeats-M4)
 
-Authors: Philippe Remy and Jean-Sebastien Dhr. 
+ Framework | Tensorflow (2.6, 2.7, 2.8) | Pytorch 1.x |
+ | :--- | :--- | :--- |
+Downloads Count          | [![NBEATS - Keras - Downloads](https://pepy.tech/badge/nbeats-keras)](https://pepy.tech/project/nbeats-keras) | [![NBEATS - PyTorch - Downloads](https://pepy.tech/badge/nbeats-pytorch)](https://pepy.tech/project/nbeats-pytorch) |
 
 ![Keras TCN CI](https://github.com/philipperemy/n-beats/workflows/N%20Beats%20CI/badge.svg?branch=master)
 
- */* | *Tensorflow (2.6, 2.7, 2.8)* | *Pytorch* |
- | :--- | :--- | :--- |
-Downloads          | [![NBEATS - Keras - Downloads](https://pepy.tech/badge/nbeats-keras)](https://pepy.tech/project/nbeats-keras) | [![NBEATS - PyTorch - Downloads](https://pepy.tech/badge/nbeats-pytorch)](https://pepy.tech/project/nbeats-pytorch) |
 
 <hr/>
 
