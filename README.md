@@ -124,3 +124,9 @@ if __name__ == '__main__':
   howpublished = {\url{https://github.com/philipperemy/n-beats}},
 }
 ```
+
+## Contributors
+
+<a href="https://github.com/philipperemy/n-beats/graphs/contributors">
+  <img src="https://contrib.rocks/image?repo=philipperemy/n-beats" />
+</a>
