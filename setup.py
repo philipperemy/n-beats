@@ -9,7 +9,8 @@ FRAMEWORK = os.getenv('FRAMEWORK', 'keras')  # keras, pytorch.
 INSTALL_REQUIRES = [
     'numpy',
     'pandas',
-    'matplotlib'
+    'matplotlib',
+    'protobuf==3.2'
 ]
 
 if FRAMEWORK == 'keras':
