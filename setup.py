@@ -10,7 +10,7 @@ INSTALL_REQUIRES = [
     'numpy',
     'pandas',
     'matplotlib',
-    'protobuf==3.15.0'
+    'protobuf==3.18.3'
 ]
 
 if FRAMEWORK == 'keras':
