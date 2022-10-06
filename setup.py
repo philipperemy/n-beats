@@ -12,7 +12,7 @@ INSTALL_REQUIRES = [
     'keract',  # for the intermediate outputs
     'pandas',
     'matplotlib',
-    'protobuf<=3.20'
+    'protobuf<=3.20.2'
 ]
 
 M1_MAC = platform.system() == 'Darwin' and platform.processor() == 'arm'
