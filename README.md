@@ -11,7 +11,7 @@ Downloads Count          | [![NBEATS - Keras - Downloads](https://pepy.tech/badg
 <hr/>
 
 <p align="center">
-  <img src="assets/nbeats.png" width="600"><br/>
+  <img src="assets/nbeats.png" width="400"><br/>
   <i>N-Beats in action!</i><br><br>
 </p>
 
