@@ -68,7 +68,7 @@ def subplots(outputs: dict, backend_name: str):
         axes[i].set_xlabel('t')
         axes[i].grid(axis='x')
         axes[i].grid(axis='y')
-    fig.suptitle(f'{backend_name} - Outputs of generic and the interpretable configurations', fontweight='bold')
+    fig.suptitle(f'{backend_name} - Outputs of the generic and interpretable configurations', fontweight='bold')
     plt.draw()
 
 
