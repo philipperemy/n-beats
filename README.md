@@ -11,15 +11,14 @@ Downloads Count          | [![NBEATS - Keras - Downloads](https://pepy.tech/badg
 <hr/>
 
 <p align="center">
-  <img src="nbeats.png" width="600"><br/>
+  <img src="assets/nbeats.png" width="600"><br/>
   <i>N-Beats in action!</i><br><br>
 </p>
 
-Trust me, after a few more steps, the green curve (predictions) matches the ground truth exactly :-)
 
 ## Installation
 
-Make sure you are in a virtualenv (recommended) and have python3 installed.
+Make sure you are in a virtualenv (recommended) and have python installed.
 
 ### From PyPI
 
@@ -111,6 +110,15 @@ def main():
 if __name__ == '__main__':
     main()
 ```
+
+## Interpretable Results
+
+Refer to the example [interpretable_example.py](examples/interpretable_example.py).
+
+<p align="center">
+  <img src="assets/interpretable.png"><br/>
+  <i>Details of each intermediate layer for the N-Beats model</i><br><br>
+</p>
 
 ## Citation
 
