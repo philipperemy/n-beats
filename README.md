@@ -1,30 +1,28 @@
 ## N-BEATS: Neural basis expansion analysis for interpretable time series forecasting
-Unofficial Keras/Pytorch implementation | [Paper](https://arxiv.org/abs/1905.10437) | [Results](https://github.com/fecet/NBeats-M4)
 
- Framework | Tensorflow (2.6, 2.7, 2.8) | Pytorch 1.x |
- | :--- | :--- | :--- |
-Downloads Count          | [![NBEATS - Keras - Downloads](https://pepy.tech/badge/nbeats-keras)](https://pepy.tech/project/nbeats-keras) | [![NBEATS - PyTorch - Downloads](https://pepy.tech/badge/nbeats-pytorch)](https://pepy.tech/project/nbeats-pytorch) |
+Tensorflow/Pytorch implementation | [Paper](https://arxiv.org/abs/1905.10437)
+| [Results](https://github.com/fecet/NBeats-M4)
 
-![Keras TCN CI](https://github.com/philipperemy/n-beats/workflows/N%20Beats%20CI/badge.svg?branch=master)
-
-
-<hr/>
+![NBeats CI](https://github.com/philipperemy/n-beats/workflows/N%20Beats%20CI/badge.svg?branch=master)
 
 <p align="center">
-  <img src="assets/nbeats.png" width="400"><br/>
-  <i>N-Beats in action!</i><br><br>
+  <img src="assets/interpretable.png"><br/>
+  <i>N-Beats - The interpretable model</i><br><br>
 </p>
-
 
 ## Installation
 
-Make sure you are in a virtualenv (recommended) and have python installed.
+It is possible to install the two backends at the same time.
 
 ### From PyPI
 
-Install Keras: `pip install nbeats-keras`.
+Install the Tensorflow/Keras backend: `pip install nbeats-keras`
 
-Install Pytorch: `pip install nbeats-pytorch`.
+[![NBEATS - Keras - Downloads](https://pepy.tech/badge/nbeats-keras)](https://pepy.tech/project/nbeats-keras)
+
+Install the Pytorch backend: `pip install nbeats-pytorch`
+
+[![NBEATS - PyTorch - Downloads](https://pepy.tech/badge/nbeats-pytorch)](https://pepy.tech/project/nbeats-pytorch)
 
 ### From the sources
 
@@ -36,11 +34,12 @@ Command to install N-Beats with Pytorch: `make install-pytorch`
 
 ### Run on the GPU
 
-To force the utilization of the GPU (with the Keras backend), run: `pip uninstall -y tensorflow && pip install tensorflow-gpu`.
+To force the utilization of the GPU (with the Keras backend),
+run: `pip uninstall -y tensorflow && pip install tensorflow-gpu`.
+
+*NOTE*: It is possible that this is no longer necessary to do that for the recent versions of Tensorflow.
 
 ## Example
-
-Jupyter notebook: [NBeats.ipynb](examples/NBeats.ipynb): `make run-jupyter`.
 
 Here is a toy example on how to use this model (train/inference) for the Keras and Pytorch backends.
 
@@ -111,13 +110,12 @@ if __name__ == '__main__':
     main()
 ```
 
-## Interpretable Results
+Browse the [examples](examples) for more.
 
-Refer to the example [interpretable_example.py](examples/interpretable_example.py).
+Jupyter notebook: [NBeats.ipynb](examples/NBeats.ipynb): `make run-jupyter`.
 
 <p align="center">
-  <img src="assets/interpretable.png"><br/>
-  <i>Details of each intermediate layer for the N-Beats model</i><br><br>
+  <img src="assets/nbeats.png"><br/>
 </p>
 
 ## Citation
