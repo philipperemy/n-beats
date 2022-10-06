@@ -59,6 +59,8 @@ class NBeatsNet:
         self.output_shape = (self.forecast_length, self.output_dim)
         self.weights = {}
         self.nb_harmonics = nb_harmonics
+        self._gen_intermediate_outputs = False
+        self._intermediary_outputs = []
         assert len(self.stack_types) == len(self.thetas_dim)
 
         x = Input(shape=self.input_shape, name='input_variable')
@@ -81,6 +83,11 @@ class NBeatsNet:
                 backcast, forecast = self.create_block(x_, e_, stack_id, block_id, stack_type, nb_poly)
                 for k in range(self.input_dim):
                     x_[k] = Subtract()([x_[k], backcast[k]])
+                    layer_name = f'stack_{stack_id}-{stack_type.title()}Block_{block_id}'
+                    if self.input_dim >= 1:
+                        layer_name += f'_Dim_{k}'
+                    # rename.
+                    forecast[k] = Lambda(function=lambda _x: _x, name=layer_name)(forecast[k])
                     if stack_id == 0 and block_id == 0:
                         y_[k] = forecast[k]
                     else:
@@ -107,10 +114,20 @@ class NBeatsNet:
         self.models = {model.name: model for model in [n_beats_backcast, n_beats_forecast]}
         self.cast_type = self._FORECAST
 
+    def get_generic_and_interpretable_outputs(self):
+        g_pred = sum([a['value'][0] for a in self._intermediary_outputs if 'generic' in a['layer'].lower()])
+        i_pred = sum([a['value'][0] for a in self._intermediary_outputs if 'generic' not in a['layer'].lower()])
+        outputs = {o['layer']: o['value'][0] for o in self._intermediary_outputs}
+        return g_pred, i_pred, outputs
+
     def has_exog(self):
         # exo/exog is short for 'exogenous variable', i.e. any input
         # features other than the target time-series itself.
         return self.exo_dim > 0
+
+    @staticmethod
+    def name():
+        return 'NBeatsKeras'
 
     @staticmethod
     def load(filepath, custom_objects=None, compile=True):
@@ -131,6 +148,12 @@ class NBeatsNet:
                 self.weights[stack_id] = {}
             self.weights[stack_id][layer_name] = layer_with_weights
         return layer_with_weights
+
+    def disable_intermediate_outputs(self):
+        self._gen_intermediate_outputs = False
+
+    def enable_intermediate_outputs(self):
+        self._gen_intermediate_outputs = True
 
     def create_block(self, x, e, stack_id, block_id, stack_type, nb_poly):
         # register weights (useful when share_weights_in_stack=True)
@@ -200,6 +223,13 @@ class NBeatsNet:
             if attr.__name__ == 'predict' and 'return_backcast' in kwargs and kwargs['return_backcast']:
                 del kwargs['return_backcast']
                 cast_type = self._BACKCAST
+
+            if attr.__name__ == 'predict' and self._gen_intermediate_outputs:
+                import keract
+                outputs = keract.get_activations(model=self, x=args)
+                self._intermediary_outputs = [
+                    {'layer': a, 'value': b} for a, b in outputs.items() if str(a).startswith('stack_')
+                ]
             return getattr(self.models[cast_type], attr.__name__)(*args, **kwargs)
 
         return wrapper
