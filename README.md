@@ -34,14 +34,12 @@ Command to install N-Beats with Pytorch: `make install-pytorch`
 
 #### Run on the GPU
 
-To force the utilization of the GPU (with the Keras backend),
-run: `pip uninstall -y tensorflow && pip install tensorflow-gpu`.
-
-*NOTE*: It is possible that this is no longer necessary to do that for the recent versions of Tensorflow.
+It is possible that this is no longer necessary on the recent versions of Tensorflow.  To force the utilization of the GPU (with the Keras backend),
+run: `pip uninstall -y tensorflow && pip install tensorflow-gpu`. 
 
 ### Example
 
-Here is a toy example on how to use this model (train/inference) for the Keras and Pytorch backends. Note that only the Keras backend supports `input_dim>1` (at the moment).
+Here is an example to get familiar with both backends. Note that only the Keras backend supports `input_dim>1` at the moment.
 
 ```python
 import warnings
@@ -113,7 +111,7 @@ Browse the [examples](examples) for more. It includes Jupyter notebooks.
 Jupyter notebook: [NBeats.ipynb](examples/NBeats.ipynb): `make run-jupyter`.
 
 <p align="center">
-  <img src="assets/nbeats.png"><br/>
+  <img src="assets/nbeats.png" width="500"><br/>
 </p>
 
 ### Citation
