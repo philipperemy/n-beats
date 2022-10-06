@@ -7,7 +7,7 @@ Tensorflow/Pytorch implementation | [Paper](https://arxiv.org/abs/1905.10437)
 
 <p align="center">
   <img src="assets/interpretable.png"><br/>
-  <i>N-Beats - The interpretable model</i><br><br>
+  <i>N-Beats - The interpretable model</i>
 </p>
 
 ### Installation
