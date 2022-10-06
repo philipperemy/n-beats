@@ -1,33 +1,30 @@
-## N-BEATS: Neural basis expansion analysis for interpretable time series forecasting
-Unofficial Keras/Pytorch implementation | [Paper](https://arxiv.org/abs/1905.10437) | [Results](https://github.com/fecet/NBeats-M4)
+## NBEATS<br/>Neural basis expansion analysis for interpretable time series forecasting
 
- Framework | Tensorflow (2.6, 2.7, 2.8) | Pytorch 1.x |
- | :--- | :--- | :--- |
-Downloads Count          | [![NBEATS - Keras - Downloads](https://pepy.tech/badge/nbeats-keras)](https://pepy.tech/project/nbeats-keras) | [![NBEATS - PyTorch - Downloads](https://pepy.tech/badge/nbeats-pytorch)](https://pepy.tech/project/nbeats-pytorch) |
+Tensorflow/Pytorch implementation | [Paper](https://arxiv.org/abs/1905.10437)
+| [Results](https://github.com/fecet/NBeats-M4)
 
-![Keras TCN CI](https://github.com/philipperemy/n-beats/workflows/N%20Beats%20CI/badge.svg?branch=master)
-
-
-<hr/>
+![NBeats CI](https://github.com/philipperemy/n-beats/workflows/N%20Beats%20CI/badge.svg?branch=master)
 
 <p align="center">
-  <img src="nbeats.png" width="600"><br/>
-  <i>N-Beats in action!</i><br><br>
+  <img src="assets/interpretable.png"><br/>
+  <i>Outputs of the generic and interpretable layers</i>
 </p>
 
-Trust me, after a few more steps, the green curve (predictions) matches the ground truth exactly :-)
+### Installation
 
-## Installation
+It is possible to install the two backends at the same time.
 
-Make sure you are in a virtualenv (recommended) and have python3 installed.
+#### From PyPI
 
-### From PyPI
+Install the Tensorflow/Keras backend: `pip install nbeats-keras`
 
-Install Keras: `pip install nbeats-keras`.
+[![NBEATS - Keras - Downloads](https://pepy.tech/badge/nbeats-keras)](https://pepy.tech/project/nbeats-keras)
 
-Install Pytorch: `pip install nbeats-pytorch`.
+Install the Pytorch backend: `pip install nbeats-pytorch`
 
-### From the sources
+[![NBEATS - PyTorch - Downloads](https://pepy.tech/badge/nbeats-pytorch)](https://pepy.tech/project/nbeats-pytorch)
+
+#### From the sources
 
 Installation is based on a MakeFile.
 
@@ -35,17 +32,14 @@ Command to install N-Beats with Keras: `make install-keras`
 
 Command to install N-Beats with Pytorch: `make install-pytorch`
 
-### Run on the GPU
+#### Run on the GPU
 
-To force the utilization of the GPU (with the Keras backend), run: `pip uninstall -y tensorflow && pip install tensorflow-gpu`.
+It is possible that this is no longer necessary on the recent versions of Tensorflow.  To force the utilization of the GPU (with the Keras backend),
+run: `pip uninstall -y tensorflow && pip install tensorflow-gpu`. 
 
-## Example
+### Example
 
-Jupyter notebook: [NBeats.ipynb](examples/NBeats.ipynb): `make run-jupyter`.
-
-Here is a toy example on how to use this model (train/inference) for the Keras and Pytorch backends.
-
-Note that only the Keras backend supports `input_dim>1` (at the moment).
+Here is an example to get familiar with both backends. Note that only the Keras backend supports `input_dim>1` at the moment.
 
 ```python
 import warnings
@@ -112,7 +106,15 @@ if __name__ == '__main__':
     main()
 ```
 
-## Citation
+Browse the [examples](examples) for more. It includes Jupyter notebooks.
+
+Jupyter notebook: [NBeats.ipynb](examples/NBeats.ipynb): `make run-jupyter`.
+
+<p align="center">
+  <img src="assets/nbeats.png" width="500"><br/>
+</p>
+
+### Citation
 
 ```
 @misc{NBeatsPRemy,
@@ -125,7 +127,9 @@ if __name__ == '__main__':
 }
 ```
 
-## Contributors
+### Contributors
+
+Thank you!
 
 <a href="https://github.com/philipperemy/n-beats/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=philipperemy/n-beats" />

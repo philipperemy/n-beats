@@ -16,16 +16,18 @@ class NBeatsNet(nn.Module):
     TREND_BLOCK = 'trend'
     GENERIC_BLOCK = 'generic'
 
-    def __init__(self,
-                 device=torch.device('cpu'),
-                 stack_types=(TREND_BLOCK, SEASONALITY_BLOCK),
-                 nb_blocks_per_stack=3,
-                 forecast_length=5,
-                 backcast_length=10,
-                 thetas_dim=(4, 8),
-                 share_weights_in_stack=False,
-                 hidden_layer_units=256,
-                 nb_harmonics=None):
+    def __init__(
+            self,
+            device=torch.device('cpu'),
+            stack_types=(TREND_BLOCK, SEASONALITY_BLOCK),
+            nb_blocks_per_stack=3,
+            forecast_length=5,
+            backcast_length=10,
+            thetas_dim=(4, 8),
+            share_weights_in_stack=False,
+            hidden_layer_units=256,
+            nb_harmonics=None
+    ):
         super(NBeatsNet, self).__init__()
         self.forecast_length = forecast_length
         self.backcast_length = backcast_length
@@ -45,6 +47,8 @@ class NBeatsNet(nn.Module):
         self.to(self.device)
         self._loss = None
         self._opt = None
+        self._gen_intermediate_outputs = False
+        self._intermediary_outputs = []
 
     def create_stack(self, stack_id):
         stack_type = self.stack_types[stack_id]
@@ -55,12 +59,21 @@ class NBeatsNet(nn.Module):
             if self.share_weights_in_stack and block_id != 0:
                 block = blocks[-1]  # pick up the last one when we share weights.
             else:
-                block = block_init(self.hidden_layer_units, self.thetas_dim[stack_id],
-                                   self.device, self.backcast_length, self.forecast_length, self.nb_harmonics)
+                block = block_init(
+                    self.hidden_layer_units, self.thetas_dim[stack_id],
+                    self.device, self.backcast_length, self.forecast_length,
+                    self.nb_harmonics
+                )
                 self.parameters.extend(block.parameters())
             print(f'     | -- {block}')
             blocks.append(block)
         return blocks
+
+    def disable_intermediate_outputs(self):
+        self._gen_intermediate_outputs = False
+
+    def enable_intermediate_outputs(self):
+        self._gen_intermediate_outputs = True
 
     def save(self, filename: str):
         torch.save(self, filename)
@@ -161,7 +174,18 @@ class NBeatsNet(nn.Module):
             return b
         return f
 
+    @staticmethod
+    def name():
+        return 'NBeatsPytorch'
+
+    def get_generic_and_interpretable_outputs(self):
+        g_pred = sum([a['value'][0] for a in self._intermediary_outputs if 'generic' in a['layer'].lower()])
+        i_pred = sum([a['value'][0] for a in self._intermediary_outputs if 'generic' not in a['layer'].lower()])
+        outputs = {o['layer']: o['value'][0] for o in self._intermediary_outputs}
+        return g_pred, i_pred, outputs
+
     def forward(self, backcast):
+        self._intermediary_outputs = []
         backcast = squeeze_last_dim(backcast)
         forecast = torch.zeros(size=(backcast.size()[0], self.forecast_length,))  # maybe batch size here.
         for stack_id in range(len(self.stacks)):
@@ -169,6 +193,10 @@ class NBeatsNet(nn.Module):
                 b, f = self.stacks[stack_id][block_id](backcast)
                 backcast = backcast.to(self.device) - b
                 forecast = forecast.to(self.device) + f
+                block_type = self.stacks[stack_id][block_id].__class__.__name__
+                layer_name = f'stack_{stack_id}-{block_type}_{block_id}'
+                if self._gen_intermediate_outputs:
+                    self._intermediary_outputs.append({'value': f.detach().numpy(), 'layer': layer_name})
         return backcast, forecast
 
 
@@ -182,8 +210,8 @@ def seasonality_model(thetas, t, device):
     p = thetas.size()[-1]
     assert p <= thetas.shape[1], 'thetas_dim is too big.'
     p1, p2 = (p // 2, p // 2) if p % 2 == 0 else (p // 2, p // 2 + 1)
-    s1 = torch.tensor([np.cos(2 * np.pi * i * t) for i in range(p1)]).float()  # H/2-1
-    s2 = torch.tensor([np.sin(2 * np.pi * i * t) for i in range(p2)]).float()
+    s1 = torch.tensor(np.array([np.cos(2 * np.pi * i * t) for i in range(p1)])).float()  # H/2-1
+    s2 = torch.tensor(np.array([np.sin(2 * np.pi * i * t) for i in range(p2)])).float()
     S = torch.cat([s1, s2])
     return thetas.mm(S.to(device))
 
@@ -191,7 +219,7 @@ def seasonality_model(thetas, t, device):
 def trend_model(thetas, t, device):
     p = thetas.size()[-1]
     assert p <= 4, 'thetas_dim is too big.'
-    T = torch.tensor([t ** i for i in range(p)]).float()
+    T = torch.tensor(np.array([t ** i for i in range(p)])).float()
     return thetas.mm(T.to(device))
 
 
