@@ -1,4 +1,4 @@
-## NBEATS - Neural basis expansion analysis for interpretable time series forecasting
+## NBEATS - Neural basis expansion analysis for interpretable<br/>time series forecasting
 
 Tensorflow/Pytorch implementation | [Paper](https://arxiv.org/abs/1905.10437)
 | [Results](https://github.com/fecet/NBeats-M4)
