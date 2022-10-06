@@ -7,7 +7,7 @@ Tensorflow/Pytorch implementation | [Paper](https://arxiv.org/abs/1905.10437)
 
 <p align="center">
   <img src="assets/interpretable.png"><br/>
-  <i>N-Beats - The interpretable model</i>
+  <i>Outputs of the generic and interpretable layers</i>
 </p>
 
 ### Installation
@@ -41,9 +41,7 @@ run: `pip uninstall -y tensorflow && pip install tensorflow-gpu`.
 
 ### Example
 
-Here is a toy example on how to use this model (train/inference) for the Keras and Pytorch backends.
-
-Note that only the Keras backend supports `input_dim>1` (at the moment).
+Here is a toy example on how to use this model (train/inference) for the Keras and Pytorch backends. Note that only the Keras backend supports `input_dim>1` (at the moment).
 
 ```python
 import warnings
@@ -110,7 +108,7 @@ if __name__ == '__main__':
     main()
 ```
 
-Browse the [examples](examples) for more.
+Browse the [examples](examples) for more. It includes Jupyter notebooks.
 
 Jupyter notebook: [NBeats.ipynb](examples/NBeats.ipynb): `make run-jupyter`.
 
@@ -132,6 +130,8 @@ Jupyter notebook: [NBeats.ipynb](examples/NBeats.ipynb): `make run-jupyter`.
 ```
 
 ### Contributors
+
+Thank you!
 
 <a href="https://github.com/philipperemy/n-beats/graphs/contributors">
   <img src="https://contrib.rocks/image?repo=philipperemy/n-beats" />
