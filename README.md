@@ -7,7 +7,7 @@ Tensorflow/Pytorch implementation | [Paper](https://arxiv.org/abs/1905.10437)
 
 <p align="center">
   <img src="assets/interpretable.png"><br/>
-  <i>Outputs of the generic and interpretable layers</i>
+  <i>Outputs of the generic and interpretable layers of NBEATS</i>
 </p>
 
 ### Installation
