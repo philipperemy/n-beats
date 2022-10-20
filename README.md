@@ -34,7 +34,7 @@ Command to install N-Beats with Pytorch: `make install-pytorch`
 
 #### Run on the GPU
 
-It is possible that this is no longer necessary on the recent versions of Tensorflow.  To force the utilization of the GPU (with the Keras backend),
+This trick is no longer necessary on the recent versions of Tensorflow.  To force the utilization of the GPU (with the Keras backend),
 run: `pip uninstall -y tensorflow && pip install tensorflow-gpu`. 
 
 ### Example
