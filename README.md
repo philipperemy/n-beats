@@ -110,9 +110,6 @@ Browse the [examples](examples) for more. It includes Jupyter notebooks.
 
 Jupyter notebook: [NBeats.ipynb](examples/NBeats.ipynb): `make run-jupyter`.
 
-<p align="center">
-  <img src="assets/nbeats.png" width="500"><br/>
-</p>
 
 ### Citation
 
