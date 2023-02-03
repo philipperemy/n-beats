@@ -38,5 +38,5 @@ test:
 	# cd examples && python trainer_pytorch.py --task dummy --test
 	# pytest
 	pip3 install tox
-	export FRAMEWORK="pytorch" && python3 -m tox -e py3-torch
-	export FRAMEWORK="keras" && python3 -m tox -e py3-tf-2.8.0,py3-tf-2.9.0,py3-tf-2.10.0,py3-tf-2.11.0
+	export FRAMEWORK="pytorch" && python3 -m tox -e torch
+	export FRAMEWORK="keras" && python3 -m tox -e keras
