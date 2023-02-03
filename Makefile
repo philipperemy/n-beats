@@ -32,11 +32,7 @@ run-jupyter:
 	jupyter notebook examples/NBeats.ipynb
 
 test:
-	# pip install pytest
-	# pip install -r examples/examples-requirements.txt
-	# cd examples && python trainer_keras.py --task dummy --test
-	# cd examples && python trainer_pytorch.py --task dummy --test
-	# pytest
 	pip3 install tox
-	export FRAMEWORK="pytorch" && python3 -m tox -e torch
+	rm -rf .tox
+	export FRAMEWORK="pytorch" && touch .torch && python3 -m tox -e torch; rm .torch
 	export FRAMEWORK="keras" && python3 -m tox -e keras

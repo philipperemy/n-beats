@@ -2,9 +2,12 @@ import os
 import platform
 
 from setuptools import setup
+from pathlib import Path
 
 BASE_VERSION = '1.8.0'  # update regardless whether you update keras or pytorch or both.
 FRAMEWORK = os.getenv('FRAMEWORK', 'keras')  # keras, pytorch.
+if Path('.torch').exists():
+    FRAMEWORK = 'pytorch'
 
 # common packages.
 INSTALL_REQUIRES = [
