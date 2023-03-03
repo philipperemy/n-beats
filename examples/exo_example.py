@@ -6,7 +6,7 @@ from nbeats_keras.model import NBeatsNet as NBeatsKeras
 # As of today, exogenous variables have only been implemented in the Keras backend.
 def main():
     # Let's consider a setup where we have [sunshine] and [rainfall] and we want to predict [rainfall].
-    # [sunshine] will be our external variable (endogenous).
+    # [sunshine] will be our external variable (exogenous).
     # [rainfall] will be our internal variable (endogenous).
     # We assume that rainfall[t] depends on the previous values of rainfall[t-1], ... rainfall[t-N].
     # And we also think that rainfall[t] depends on sunshine.
